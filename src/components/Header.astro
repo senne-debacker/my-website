@@ -1,13 +1,14 @@
 ---
 const base = import.meta.env.BASE_URL;
+const getPath = (path) => `${base.replace(/\/$/, '')}/${path}`;
 ---
 <header class="header">
   <div class="header-container">
     <a href={base} class="logo">SENNE DE BACKER</a>
     <nav class="nav">
-      <a href={`${base}/work`}>[ My Work ]</a>
-      <a href={`${base}/about`}>[ About Me ]</a>
-      <a href={`${base}/contact`}>[ Contact Me ]</a>
+      <a href={getPath('work')}>[ My Work ]</a>
+      <a href={getPath('about')}>[ About Me ]</a>
+      <a href={getPath('contact')}>[ Contact Me ]</a>
     </nav>
   </div>
 </header>
