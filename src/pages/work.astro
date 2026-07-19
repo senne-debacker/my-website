@@ -1,5 +1,5 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
@@ -8,43 +8,46 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
   <section class="page-section">
     <div class="page-header">
       <h1>My Work</h1>
-      <p class="lead">A curated selection of design iterations, interactive frameworks, and digital architectures.</p>
+      <p class="lead">
+        A curated selection of design iterations, interactive frameworks, and
+        digital architectures.
+      </p>
     </div>
 
-<div class="work-grid">
-  <!-- Project 1 -->
-  <a href={`${baseUrl}/work/1`} class="work-card">
-    <div class="iframe-placeholder">
-      <span>[ Project 1 Preview / Figma Embed ]</span>
-    </div>
-    <div class="card-meta">
-      <h3>Featured Project One</h3>
-      <p>View detailed case study &rarr;</p>
-    </div>
-  </a>
+    <div class="work-grid">
+      <!-- Project 1 -->
+      <a href={`${baseUrl}/work/1`} class="work-card">
+        <div class="iframe-placeholder">
+          <span>[ Project 1 Preview / Figma Embed ]</span>
+        </div>
+        <div class="card-meta">
+          <h3>Featured Project One</h3>
+          <p>View detailed case study &rarr;</p>
+        </div>
+      </a>
 
-  <!-- Project 2 -->
-  <a href={`${baseUrl}/work/2`} class="work-card">
-    <div class="iframe-placeholder">
-      <span>[ Project 2 Preview / Figma Embed ]</span>
-    </div>
-    <div class="card-meta">
-      <h3>Featured Project Two</h3>
-      <p>View detailed case study &rarr;</p>
-    </div>
-  </a>
+      <!-- Project 2 -->
+      <a href={`${baseUrl}/work/2`} class="work-card">
+        <div class="iframe-placeholder">
+          <span>[ Project 2 Preview / Figma Embed ]</span>
+        </div>
+        <div class="card-meta">
+          <h3>Featured Project Two</h3>
+          <p>View detailed case study &rarr;</p>
+        </div>
+      </a>
 
-  <!-- Project 3 -->
-  <a href={`${baseUrl}/work/3`} class="work-card">
-    <div class="iframe-placeholder">
-      <span>[ Project 3 Preview / Figma Embed ]</span>
+      <!-- Project 3 -->
+      <a href={`${baseUrl}/work/3`} class="work-card">
+        <div class="iframe-placeholder">
+          <span>[ Project 3 Preview / Figma Embed ]</span>
+        </div>
+        <div class="card-meta">
+          <h3>Featured Project Three</h3>
+          <p>View detailed case study &rarr;</p>
+        </div>
+      </a>
     </div>
-    <div class="card-meta">
-      <h3>Featured Project Three</h3>
-      <p>View detailed case study &rarr;</p>
-    </div>
-  </a>
-</div>
   </section>
 </Layout>
 
@@ -74,11 +77,13 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     border: 1px solid var(--border-color);
     border-radius: 12px;
     overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
   }
   .work-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.04);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.04);
   }
   .iframe-placeholder {
     background-color: #f0f0f0;
