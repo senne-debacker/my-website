@@ -1,0 +1,54 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+<header class="header">
+  <div class="header-container">
+    <a href={base} class="logo">SENNE DE BACKER</a>
+    <nav class="nav">
+      <a href={`${base}work`}>[ My Work ]</a>
+      <a href={`${base}about`}>[ About Me ]</a>
+      <a href={`${base}contact`}>[ Contact Me ]</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(252, 252, 252, 0.8);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .logo {
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .nav {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  @media (max-width: 600px) {
+    .header-container {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+</style>

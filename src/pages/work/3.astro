@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Layout title="Project Three Detail">
+  <section class="detail-container">
+    <a href={`${baseUrl}/work`} class="back-link">&larr; Back to work</a>
+    
+    <header class="project-header">
+      <h1>Project Three Case Study</h1>
+      <p class="tagline">Interaction & Responsive Application Architecture</p>
+    </header>
+
+    <div class="main-embed-placeholder">
+      <span>[ Large Project Preview Embed Frame ]</span>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .detail-container { padding: 3rem 0; }
+  .back-link { font-size: 0.9rem; color: var(--text-muted); }
+  .project-header { margin: 1.5rem 0 3rem 0; }
+  .project-header h1 { font-size: 2.5rem; }
+  .tagline { color: var(--accent-color); font-size: 1.1rem; }
+  .main-embed-placeholder { background-color: #f0f0f0; border: 2px dashed #ccc; border-radius: 12px; aspect-ratio: 16 / 10; display: flex; align-items: center; justify-content: center; color: #888; }
+</style>

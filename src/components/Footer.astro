@@ -1,0 +1,92 @@
+---
+interface Props {
+  isFullPage?: boolean;
+}
+const { isFullPage = false } = Astro.props;
+---
+<footer class={`footer ${isFullPage ? 'full-page' : ''}`}>
+  <div class="footer-container">
+    <div class="footer-section identity">
+      <h3>Senne De Backer</h3>
+      <p class="muted">Buggenhout, Belgium</p>
+    </div>
+    
+    <div class="footer-section contact">
+      <p><strong>E-mail:</strong> <a href="mailto:sennedebacker13@gmail.com">sennedebacker13@gmail.com</a></p>
+    </div>
+
+    <div class="footer-section socials">
+      <a href="https://github.com/senne-debacker" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="#" class="disabled">LinkedIn (tba)</a>
+      <a href="#" class="disabled">Behance (tba)</a>
+      <a href="https://www.instagram.com/debacker_devine/" target="_blank" rel="noopener noreferrer">Instagram</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--border-color);
+    padding: 3rem 1.5rem;
+    width: 100%;
+    background: #fafafa;
+  }
+
+  .footer.full-page {
+    border-top: none;
+    background: transparent;
+    padding: 0;
+  }
+
+  .footer-container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  .footer.full-page .footer-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 2.5rem;
+  }
+
+  .footer-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .muted {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .socials {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .footer.full-page .socials {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .disabled {
+    color: #ccc;
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    .footer-container {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .socials {
+      flex-wrap: wrap;
+    }
+  }
+</style>

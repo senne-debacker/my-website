@@ -1,0 +1,137 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Layout title="About Me">
+  <section class="about-layout animate-fade">
+    <div class="about-main">
+      <h1>About Me</h1>
+      <p class="lead">Hi, I’m Senne, a 22-year-old Creative Developer and Designer based in Buggenhout. I am currently heading into my third and final year of Digital Design & Development (Devine) at Howest Kortrijk.</p>
+      
+      <div class="bio-block">
+        <h2>Leadership & Soft Skills</h2>
+        <p>Beyond code and screens, I have spent 16 years in the Chiro (youth movement), serving 4 years as a youth leader and 3 years as the group leader (groepsleider).</p>
+        <p>Leading a group of over 200 kids and adolescents and managing a team of 35 co-leaders taught me skills like communication, crisis management, organization, planning, and mainly: <strong>working as a team</strong>.</p>
+      </div>
+
+      <div class="bio-block">
+        <h2>Freelance & Collaborations</h2>
+        <p>I am registered as a student-entrepreneur and am currently available for freelance projects (working remotely or on-site).</p>
+      </div>
+      
+      <div class="cta-wrapper">
+        <a href={`${baseUrl}/contact`} class="cta-btn">[ Let's connect ]</a>
+      </div>
+    </div>
+
+    <div class="skills-sidebar">
+      <h2>Hard Skills</h2>
+      
+      <div class="skill-category">
+        <h3>Frontend & Creative Dev</h3>
+        <ul>
+          <li>HTML5 / CSS3 / JavaScript (ES6+)</li>
+          <li>TypeScript</li>
+          <li>React & Astro</li>
+          <li>Git & GitHub</li>
+        </ul>
+      </div>
+
+      <div class="skill-category">
+        <h3>Design & Motion</h3>
+        <ul>
+          <li>UI/UX Design (Figma)</li>
+          <li>Prototyping</li>
+          <li>Adobe Creative Suite (Illustrator, Photoshop)</li>
+          <li>Motion Design (After Effects)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .about-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 4rem;
+    padding: 3rem 0;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 2rem;
+  }
+
+  .lead {
+    font-size: 1.2rem;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+
+  .bio-block p {
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  .cta-wrapper {
+    margin-top: 3rem;
+  }
+
+  .cta-btn {
+    font-weight: 700;
+    color: var(--accent-color);
+    font-size: 1.1rem;
+  }
+
+  .skills-sidebar {
+    background: #fafafa;
+    padding: 2.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    align-self: start;
+  }
+
+  .skills-sidebar h2 {
+    margin-top: 0;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .skill-category {
+    margin-bottom: 1.5rem;
+  }
+
+  .skill-category h3 {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+
+  .skill-category ul {
+    list-style-type: none;
+  }
+
+  .skill-category li {
+    padding: 0.25rem 0;
+    font-weight: 500;
+  }
+
+  @media (max-width: 900px) {
+    .about-layout {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+  }
+</style>
