@@ -1,6 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro';
-const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+import Layout from "../layouts/Layout.astro";
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
 
 <Layout title="Home">
@@ -9,14 +9,17 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
       <h1>SENNE DE BACKER</h1>
       <p class="subtitle">UX/UI Designer & Creative Developer</p>
       <p class="location">📍 Buggenhout, Belgium</p>
-      
+
       <div class="quick-nav">
         <a href={`${baseUrl}/work`} class="main-cta">View My Work &rarr;</a>
       </div>
     </div>
-    
-    <div class="image-placeholder main-avatar">
-      <span>[ Image Placeholder: Creative Avatar / Portrait ]</span>
+
+    <div class="avatar-container main-avatar">
+      <img
+        src={`${baseUrl}/images/diy-1-cropped.png`}
+        alt="Senne De Backer - Portrait"
+      />
     </div>
   </section>
 </Layout>
@@ -83,6 +86,25 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
   .main-avatar {
     aspect-ratio: 1 / 1;
     border-radius: 50%;
+  }
+
+  .avatar-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; 
+  }
+
+  .main-avatar {
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+  }
+
+  .main-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    object-position: center; 
   }
 
   @media (max-width: 900px) {
