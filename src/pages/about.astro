@@ -1,26 +1,49 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 
-const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
 
 <Layout title="About Me">
   <section class="about-layout animate-fade">
     <div class="about-main">
       <h1>About Me</h1>
-      <p class="lead">Hi, I’m Senne, a 22-year-old Creative Developer and Designer based in Buggenhout. I am currently heading into my third and final year of Digital Design & Development (Devine) at Howest Kortrijk.</p>
-      
+      <div class="avatar-container main-avatar">
+        <img
+          src={`${baseUrl}/images/tokyo-1.png`}
+          alt="Senne De Backer - Portrait"
+        />
+      </div>
+      <p class="lead">
+        Hi, I’m Senne, a 22-year-old Creative Developer and Designer based in
+        Buggenhout. I am currently heading into my third and final year of
+        Digital Design & Development (Devine) at Howest Kortrijk.
+      </p>
+
       <div class="bio-block">
         <h2>Leadership & Soft Skills</h2>
-        <p>Beyond code and screens, I have spent 16 years in the Chiro (youth movement), serving 4 years as a youth leader and 3 years as the group leader (groepsleider).</p>
-        <p>Leading a group of over 200 kids and adolescents and managing a team of 35 co-leaders taught me skills like communication, crisis management, organization, planning, and mainly: <strong>working as a team</strong>.</p>
+        <p>
+          Beyond code and screens, I have spent 16 years in the Chiro (youth
+          movement), serving 4 years as a youth leader and 3 years as the group
+          leader (groepsleider).
+        </p>
+        <p>
+          Leading a group of over 200 kids and adolescents and managing a team
+          of 35 co-leaders taught me skills like communication, crisis
+          management, organization, planning, and mainly: <strong
+            >working as a team</strong
+          >.
+        </p>
       </div>
 
       <div class="bio-block">
         <h2>Freelance & Collaborations</h2>
-        <p>I am registered as a student-entrepreneur and am currently available for freelance projects (working remotely or on-site).</p>
+        <p>
+          I am registered as a student-entrepreneur and am currently available
+          for freelance projects (working remotely or on-site).
+        </p>
       </div>
-      
+
       <div class="cta-wrapper">
         <a href={`${baseUrl}/contact`} class="cta-btn">[ Let's connect ]</a>
       </div>
@@ -28,7 +51,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 
     <div class="skills-sidebar">
       <h2>Hard Skills</h2>
-      
+
       <div class="skill-category">
         <h3>Frontend & Creative Dev</h3>
         <ul>
@@ -65,6 +88,13 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     margin-bottom: 1.5rem;
   }
 
+  .avatar-container.main-avatar {
+    width: 24%;
+    max-width: 300px;
+    border-radius: 20%;
+    margin-bottom: 2rem;
+  }
+  
   h2 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
@@ -80,7 +110,6 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 
   .bio-block p {
     margin-bottom: 1rem;
-    color: #333;
   }
 
   .cta-wrapper {
@@ -94,10 +123,9 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
   }
 
   .skills-sidebar {
-    background: #fafafa;
+    background: #050914;
     padding: 2.5rem;
     border-radius: 12px;
-    border: 1px solid var(--border-color);
     align-self: start;
   }
 
