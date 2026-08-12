@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 
-const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
 
 <Layout title="My Work">
@@ -17,33 +17,45 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     <div class="work-grid">
       <!-- Project 1 -->
       <a href={`${baseUrl}/work/1`} class="work-card">
-        <div class="iframe-placeholder">
-          <span>[ Project 1 Preview / Figma Embed ]</span>
+        <div class="image-container">
+          <img
+            src={`${baseUrl}/images/thrive-hero.png`}
+            alt="Thrive Pedal Play Project"
+            loading="lazy"
+          />
         </div>
         <div class="card-meta">
-          <h3>Featured Project One</h3>
+          <h3>Thrive Pedal Play Project</h3>
           <p>View detailed case study &rarr;</p>
         </div>
       </a>
 
       <!-- Project 2 -->
       <a href={`${baseUrl}/work/2`} class="work-card">
-        <div class="iframe-placeholder">
-          <span>[ Project 2 Preview / Figma Embed ]</span>
+        <div class="image-container">
+          <img
+            src={`${baseUrl}/images/lumen-hero.png`}
+            alt="Project One Preview"
+            loading="lazy"
+          />
         </div>
         <div class="card-meta">
-          <h3>Featured Project Two</h3>
+          <h3>Antwerp Campaign Website</h3>
           <p>View detailed case study &rarr;</p>
         </div>
       </a>
 
       <!-- Project 3 -->
       <a href={`${baseUrl}/work/3`} class="work-card">
-        <div class="iframe-placeholder">
-          <span>[ Project 3 Preview / Figma Embed ]</span>
+        <div class="image-container">
+          <img
+            src={`${baseUrl}/images/type01-hero.png`}
+            alt="Project One Preview"
+            loading="lazy"
+          />
         </div>
         <div class="card-meta">
-          <h3>Featured Project Three</h3>
+        <h3>TYPE01 Conference Website</h3>
           <p>View detailed case study &rarr;</p>
         </div>
       </a>

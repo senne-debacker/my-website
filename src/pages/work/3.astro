@@ -1,29 +1,85 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import Layout from "../../layouts/Layout.astro";
 
-const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
 
-<Layout title="Project Three Detail">
+<Layout title="TYPE01">
   <section class="detail-container">
     <a href={`${baseUrl}/work`} class="back-link">&larr; Back to work</a>
-    
+
     <header class="project-header">
-      <h1>Project Three Case Study</h1>
-      <p class="tagline">Interaction & Responsive Application Architecture</p>
+      <h1>TYPE01 conference website</h1>
+      <p class="tagline">
+        Create and design a modern conference website for TYPE01.
+      </p>
     </header>
 
-    <div class="main-embed-placeholder">
-      <span>[ Large Project Preview Embed Frame ]</span>
+    <div class="main-embed-container">
+      <iframe
+        style="border: 1px solid rgba(0, 0, 0, 0.1);"
+        width="800"
+        height="450"
+        src="https://embed.figma.com/proto/sC5G85UaOqpK8FpCHFwaIG/TYPE01?node-id=320-26155&viewport=223%2C100%2C0.12&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=320%3A26155&show-proto-sidebar=1&page-id=296%3A4613&embed-host=share"
+        allowfullscreen></iframe>
     </div>
+
+    <article class="project-story">
+      <h2>The Project</h2>
+      <p>
+        TYPE01 is a typography magazine, and every year they organize a conference about typography. For this project, I had to create a modern website for the conference, that is consistent with the magazine's identity and core values. We also had to make the website responsive for both desktop and mobile.
+        <br /><br />
+        I got inspiration from Swiss Style design and grid systems, I wanted to use elementary objects and colors. Using grids, basic objects and elementary colors. The result is a modern looking website with a retro feeling, which appeals to all audiences.
+      </p>
+    </article>
   </section>
 </Layout>
 
 <style>
-  .detail-container { padding: 3rem 0; }
-  .back-link { font-size: 0.9rem; color: var(--text-muted); }
-  .project-header { margin: 1.5rem 0 3rem 0; }
-  .project-header h1 { font-size: 2.5rem; }
-  .tagline { color: var(--accent-color); font-size: 1.1rem; }
-  .main-embed-placeholder { background-color: #f0f0f0; border: 2px dashed #ccc; border-radius: 12px; aspect-ratio: 16 / 10; display: flex; align-items: center; justify-content: center; color: #888; }
+  .detail-container {
+    padding: 3rem 0;
+  }
+  .back-link {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  .project-header {
+    margin: 1.5rem 0 3rem 0;
+  }
+  .project-header h1 {
+    font-size: 2.5rem;
+  }
+  .tagline {
+    color: var(--accent-color);
+    font-size: 1.1rem;
+  }
+
+  /* Responsive Figma Embed Container */
+  .main-embed-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background-color: #f0f0f0;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .main-embed-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .project-story {
+    max-width: 700px;
+  }
+  .project-story h2 {
+    margin-bottom: 1rem;
+  }
 </style>
