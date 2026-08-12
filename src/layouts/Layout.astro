@@ -34,8 +34,8 @@ const base = import.meta.env.BASE_URL;
 
 <style is:global>
 	:root {
-		--bg-color: #fcfcfc;
-		--text-color: #1a1a1a;
+		--bg-color: linear-gradient(135deg, #061126 0%, #0a1d42 52%, #15306a 100%);
+		--text-color: #fcfcfc;
 		--accent-color: #4f46e5;
 		--text-muted: #666666;
 		--border-color: #e5e7eb;
@@ -50,7 +50,7 @@ const base = import.meta.env.BASE_URL;
 
 	body {
 		font-family: 'Plus Jakarta Sans', sans-serif;
-		background-color: var(--bg-color);
+		background: var(--bg-color);
 		color: var(--text-color);
 		line-height: 1.6;
 		display: flex;
@@ -79,7 +79,7 @@ const base = import.meta.env.BASE_URL;
 	}
 
 	a:hover {
-		color: var(--accent-color);
+		color: #8586ff;
 	}
 
 	img {
