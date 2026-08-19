@@ -4,22 +4,34 @@ interface Props {
 }
 const { isFullPage = false } = Astro.props;
 ---
-<footer class={`footer ${isFullPage ? 'full-page' : ''}`}>
+
+<footer class={`footer ${isFullPage ? "full-page" : ""}`}>
   <div class="footer-container">
     <div class="footer-section identity">
       <h3>Senne De Backer</h3>
       <p class="muted">Buggenhout, Belgium</p>
     </div>
-    
+
     <div class="footer-section contact">
-      <p><strong>E-mail:</strong> <a href="mailto:design.debacker@gmail.com">design.debacker@gmail.com</a></p>
+      <p>
+        <strong>E-mail:</strong>
+        <a href="mailto:design.debacker@gmail.com">design.debacker@gmail.com</a>
+      </p>
     </div>
 
     <div class="footer-section socials">
-      <a href="https://github.com/senne-debacker" target="_blank" rel="noopener noreferrer">GitHub</a>
-      <a href="#" class="disabled">LinkedIn (tba)</a>
-      <a href="#" class="disabled">Behance (tba)</a>
-      <a href="https://www.instagram.com/debacker_devine/" target="_blank" rel="noopener noreferrer">Instagram</a>
+      <a
+        href="https://github.com/senne-debacker"
+        target="_blank"
+        rel="noopener noreferrer">GitHub</a
+      >
+      <a href="https://www.linkedin.com/in/senne-de-backer-3b945642b" target="_blank" rel="noopener noreferrer">LinkedIn</a
+      >
+      <a
+        href="https://www.instagram.com/debacker_devine/"
+        target="_blank"
+        rel="noopener noreferrer">Instagram</a
+      >
     </div>
   </div>
 </footer>
