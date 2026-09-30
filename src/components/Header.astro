@@ -1,53 +1,115 @@
 ---
-const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
+const path = Astro.url.pathname.replace(baseUrl, "");
+
+const links = [
+  { href: "/work", label: "Work" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
 ---
-<header class="header">
-  <div class="header-container">
-    <a href={import.meta.env.BASE_URL} class="logo">SENNE DE BACKER</a>
-    <nav class="nav">
-      <a href={`${baseUrl}/work`}>[ My Work ]</a>
-      <a href={`${baseUrl}/about`}>[ About Me ]</a>
-      <a href={`${baseUrl}/contact`}>[ Contact Me ]</a>
+
+<header class="header" transition:name="site-header" transition:animate="none">
+  <div class="header-inner wrap">
+    <a href={`${baseUrl}/`} class="logo label" data-magnetic="0.2">Senne De Backer</a>
+
+    <p class="local label muted">
+      Buggenhout, BE&nbsp;&nbsp;<span data-clock>--:--:--</span>
+    </p>
+
+    <nav class="nav" aria-label="Main">
+      {
+        links.map(({ href, label }) => {
+          const active = path === href || path.startsWith(`${href}/`);
+          return (
+            <a
+              href={`${baseUrl}${href}`}
+              class:list={["label", { active }]}
+              aria-current={active ? "page" : undefined}
+            >
+              <span class="nav-text" data-text={label}>{label}</span>
+            </a>
+          );
+        })
+      }
     </nav>
   </div>
 </header>
 
 <style>
   .header {
-    background:  #050914;
-    backdrop-filter: blur(8px);
     position: sticky;
     top: 0;
     z-index: 100;
+    mix-blend-mode: difference;
+    color: #fff;
   }
 
-  .header-container {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    padding: 1.5rem;
-    display: flex;
-    justify-content: space-between;
+  .header-inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    flex-wrap: wrap;
     gap: 1rem;
+    padding-block: 1.1rem;
   }
 
   .logo {
-    font-weight: 700;
-    letter-spacing: 0.05em;
+    justify-self: start;
+    display: inline-block;
+  }
+
+  .local {
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    opacity: 0.6;
   }
 
   .nav {
+    justify-self: end;
     display: flex;
-    gap: 1.5rem;
-    font-size: 0.9rem;
-    font-weight: 500;
+    gap: clamp(1rem, 3vw, 2.5rem);
   }
 
-  @media (max-width: 600px) {
-    .header-container {
-      flex-direction: column;
-      text-align: center;
+  .nav a {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+  }
+
+  /* Text roll on hover: the label slides up and a copy slides in. */
+  .nav-text {
+    display: inline-block;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  .nav-text::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 100%;
+  }
+
+  .nav a:hover .nav-text {
+    transform: translateY(-100%);
+  }
+
+  .nav a.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: currentColor;
+  }
+
+  @media (max-width: 640px) {
+    .header-inner {
+      grid-template-columns: 1fr auto;
+    }
+
+    .local {
+      display: none;
     }
   }
 </style>

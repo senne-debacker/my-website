@@ -1,76 +1,182 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Footer from '../components/Footer.astro';
-
-const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+import Layout from "../layouts/Layout.astro";
+import { email, socials } from "../data/site";
 ---
 
-<Layout title="Contact Me" isContactPage={true}>
-  <div class="contact-card-wrapper animate-fade">
-    <div class="status-badge available">
-      <span class="pulse-dot"></span> Available for freelance work
+<Layout title="Contact" hideFooterCta>
+  <section class="contact wrap">
+    <div class="status label">
+      <span class="dot" aria-hidden="true"></span>
+      Available for freelance work
     </div>
 
-    <div class="contact-card-body">
-      <Footer isFullPage={true} />
+    <h1 class="headline">
+      <span class="line"><span>Let's</span></span>
+      <span class="line"><span>talk<em>.</em></span></span>
+    </h1>
+
+    <p class="intro" data-reveal>
+      Registered as a student-entrepreneur and open to freelance projects, remote or on-site. Drop me a line.
+    </p>
+
+    <div class="email-block" data-reveal>
+      <a href={`mailto:${email}`} class="email" data-cursor="Write">{email}</a>
+      <button type="button" class="pill" data-copy={email} data-magnetic="0.2">
+        <span data-copy-feedback>Copy address</span>
+      </button>
     </div>
-  </div>
+
+    <ul class="socials">
+      {
+        socials.map((s, i) => (
+          <li data-reveal style={`--delay:${i * 0.06}s`}>
+            <a href={s.href} target="_blank" rel="noopener noreferrer" class="social rule">
+              <span class="label muted">{String(i + 1).padStart(2, "0")}</span>
+              <span class="social-name">{s.label}</span>
+              <span class="social-arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
 </Layout>
 
 <style>
-  .contact-card-wrapper {
-    background: #050914;
-    border-radius: 16px;
-    padding: 5rem 2rem;
-    width: 100%;
-    max-width: 600px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.01);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2.5rem;
-    margin: auto 0;
+  .contact {
+    padding-top: clamp(3rem, 8vw, 7rem);
   }
 
-  .status-badge {
+  .status {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 600;
+    gap: 0.6rem;
+    padding: 0.5em 0.9em;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
   }
 
-  .status-badge.available {
-    background-color: #f0fdf4;
-    color: #166534;
-  }
-
-  .pulse-dot {
-    width: 8px;
-    height: 8px;
-    background-color: #22c55e;
+  .dot {
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
+    background: #3ddc84;
     animation: pulse 2s infinite;
   }
 
-  .contact-card-body {
-    width: 100%;
-  }
-
   @keyframes pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    0% {
+      box-shadow: 0 0 0 0 rgba(61, 220, 132, 0.6);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 7px rgba(61, 220, 132, 0);
+    }
   }
 
-  .animate-fade {
-    animation: fadeIn 0.4s ease-out forwards;
+  .headline {
+    margin-top: 2rem;
+    font-size: clamp(5rem, 22vw, 22rem);
+    font-weight: 400;
+    line-height: 0.8;
+    letter-spacing: -0.075em;
+    text-transform: uppercase;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+  .line {
+    display: block;
+    overflow: hidden;
+    padding-right: 0.08em;
+    padding-bottom: 0.05em;
+  }
+
+  .line > span {
+    display: inline-block;
+    animation: rise 1.2s var(--ease-out) backwards;
+  }
+
+  .line:nth-child(2) {
+    padding-left: 1.2em;
+  }
+
+  .line:nth-child(2) > span {
+    animation-delay: 0.08s;
+  }
+
+  em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(105%);
+    }
+  }
+
+  .intro {
+    max-width: 32ch;
+    margin-top: clamp(2rem, 4vw, 3rem);
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--muted);
+  }
+
+  .email-block {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin-top: clamp(3rem, 6vw, 5rem);
+  }
+
+  .email {
+    font-size: clamp(1.5rem, 4.4vw, 4.25rem);
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    word-break: break-all;
+    background: linear-gradient(var(--accent), var(--accent)) 0 100% / 0 2px no-repeat;
+    transition: background-size 0.6s var(--ease-out);
+  }
+
+  .email:hover {
+    background-size: 100% 2px;
+  }
+
+  .socials {
+    list-style: none;
+    margin-top: clamp(4rem, 8vw, 7rem);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .social {
+    display: grid;
+    grid-template-columns: 4rem 1fr auto;
+    align-items: baseline;
+    padding: 1rem 0;
+  }
+
+  .social-name {
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .social-arrow {
+    font-size: clamp(1.25rem, 2.5vw, 2rem);
+    transition:
+      transform 0.6s var(--ease-out),
+      color 0.3s;
+  }
+
+  .social:hover .social-name {
+    transform: translateX(0.25em);
+  }
+
+  .social:hover .social-arrow {
+    transform: translate(4px, -4px);
+    color: var(--accent);
   }
 </style>

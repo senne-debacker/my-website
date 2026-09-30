@@ -1,123 +1,406 @@
 ---
+import { Image } from "astro:assets";
 import Layout from "../layouts/Layout.astro";
+import FeaturedProject from "../components/FeaturedProject.astro";
+import ProjectIndex from "../components/ProjectIndex.astro";
+import portrait from "../assets/tokyo-1.png";
+import { projects } from "../data/projects";
+
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
+const year = new Date().getFullYear();
+
+const cards = [
+  { src: portrait, alt: "Portrait of Senne De Backer", position: "50% 30%" },
+  ...projects.map((p) => ({ src: p.image, alt: "", position: "35% 50%" })),
+];
+
+const statement =
+  "I'm a creative developer and designer in my final year of Digital Design & Development at Howest Kortrijk. I design interfaces, then build them in code. Sixteen years in the Chiro, three as group leader, taught me the rest: how to work as a team.";
+
+const skills = [
+  "UX/UI Design",
+  "Creative Development",
+  "Prototyping",
+  "Motion Design",
+  "React & Astro",
+  "TypeScript",
+  "Figma",
+];
 ---
 
 <Layout title="Home">
-  <section class="hero animate-fade">
-    <div class="hero-content">
-      <h1>SENNE DE BACKER</h1>
-      <p class="subtitle">UX/UI Designer & Creative Developer</p>
-      <p class="location">Buggenhout, Belgium</p>
+  <section class="hero" data-hero>
+    <button
+      type="button"
+      class="stack"
+      data-stack
+      data-cursor="Shuffle"
+      aria-label="Shuffle the photo stack"
+    >
+      {
+        cards.map((c, i) => (
+          <span class="card" style={`--pos:${i}; --r:${[-4, 6, -9, 11][i] ?? 0}deg`}>
+            <Image
+              src={c.src}
+              alt={c.alt}
+              widths={[320, 640]}
+              sizes="(max-width: 700px) 50vw, 24vw"
+              loading="eager"
+              style={`object-position:${c.position}`}
+            />
+          </span>
+        ))
+      }
+    </button>
 
-      <div class="quick-nav">
-        <a href={`${baseUrl}/work`} class="main-cta">View My Work &rarr;</a>
-      </div>
-    </div>
+    <h1 class="hero-title">
+      <span class="line l1"><span>Hello, I'm</span></span>
+      <span class="line l2"><span>Senne De</span></span>
+      <span class="line l3"><span>Backer</span></span>
+    </h1>
 
-    <div class="avatar-container main-avatar">
-      <img
-        src={`${baseUrl}/images/tokyo-1.png`}
-        alt="Senne De Backer - Portrait"
-      />
+    <div class="hero-meta wrap label">
+      <span>UX/UI Designer</span>
+      <span class="center">A designer &amp; creative developer<br />based in Buggenhout, Belgium</span>
+      <span>©{year}</span>
     </div>
   </section>
+
+  <FeaturedProject />
+
+  <section class="statement wrap" aria-label="About">
+    <p class="label muted" data-reveal>(About)</p>
+    <p class="statement-text" data-words>
+      {statement.split(" ").map((w) => <span>{w} </span>)}
+    </p>
+    <a href={`${baseUrl}/about`} class="pill" data-magnetic="0.25" data-reveal>
+      More about me <span class="arrow">→</span>
+    </a>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      {
+        [0, 1].map(() => (
+          <span class="marquee-group">
+            {skills.map((s) => (
+              <span class="marquee-item">
+                {s}
+                <span class="star">✦</span>
+              </span>
+            ))}
+          </span>
+        ))
+      }
+    </div>
+  </div>
+
+  <ProjectIndex />
 </Layout>
 
+<script>
+  let controller: AbortController | null = null;
+
+  document.addEventListener("astro:page-load", () => {
+    controller?.abort();
+    controller = new AbortController();
+    const { signal } = controller;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* ---- Hero card stack: follows the pointer, shuffles on click ---- */
+    const hero = document.querySelector<HTMLElement>("[data-hero]");
+    const stack = hero?.querySelector<HTMLElement>("[data-stack]");
+    if (hero && stack) {
+      const cards = [...stack.querySelectorAll<HTMLElement>(".card")];
+      let order = cards.map((_, i) => i);
+      let busy = false;
+
+      const shuffle = () => {
+        if (busy) return;
+        busy = true;
+        const top = cards[order[0]];
+        top.classList.add("is-leaving");
+        setTimeout(() => {
+          order = [...order.slice(1), order[0]];
+          order.forEach((cardIndex, pos) => cards[cardIndex].style.setProperty("--pos", String(pos)));
+          top.classList.remove("is-leaving");
+          busy = false;
+        }, reduced ? 0 : 380);
+      };
+
+      stack.addEventListener("click", shuffle, { signal });
+
+      let auto = reduced ? 0 : window.setInterval(shuffle, 4000);
+      stack.addEventListener("pointerenter", () => clearInterval(auto), { signal });
+      stack.addEventListener(
+        "pointerleave",
+        () => {
+          if (!reduced) auto = window.setInterval(shuffle, 4000);
+        },
+        { signal },
+      );
+      signal.addEventListener("abort", () => clearInterval(auto));
+
+      if (!reduced) {
+        hero.addEventListener(
+          "pointermove",
+          (e) => {
+            const r = hero.getBoundingClientRect();
+            hero.style.setProperty("--mx", ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+            hero.style.setProperty("--my", ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+          },
+          { signal },
+        );
+      }
+    }
+
+    /* ---- Statement: words light up as you scroll through it ---- */
+    const text = document.querySelector<HTMLElement>("[data-words]");
+    if (text) {
+      const words = [...text.children] as HTMLElement[];
+      let frame = 0;
+      const update = () => {
+        frame = 0;
+        const r = text.getBoundingClientRect();
+        const vh = window.innerHeight;
+        // 0 when the block enters at 85% of the viewport, 1 when it reaches 35%.
+        const progress = Math.min(1, Math.max(0, (vh * 0.85 - r.top) / (vh * 0.5 + r.height * 0.5)));
+        const lit = reduced ? words.length : Math.round(progress * words.length);
+        words.forEach((w, i) => w.classList.toggle("lit", i < lit));
+      };
+      update();
+      window.addEventListener("scroll", () => (frame ||= requestAnimationFrame(update)), {
+        passive: true,
+        signal,
+      });
+      signal.addEventListener("abort", () => cancelAnimationFrame(frame));
+    }
+  });
+</script>
+
 <style>
+  /* ---------- Hero ---------- */
+
   .hero {
+    --mx: 0;
+    --my: 0;
+    position: relative;
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    align-items: center;
-    gap: 3rem;
-    padding: 8rem 0;
+    place-items: center;
+    min-height: calc(100svh - 3.3rem);
+    padding-bottom: 4.5rem;
+    overflow: hidden;
   }
 
-  .hero h1 {
-    font-size: clamp(2.5rem, 6vw, 4rem);
-    line-height: 1.1;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    letter-spacing: -0.02em;
+  .stack {
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    width: clamp(150px, 22vw, 330px);
+    aspect-ratio: 3 / 4;
+    translate: -40% -55%;
+    z-index: 1;
   }
 
-  .subtitle {
-    font-size: clamp(1.2rem, 3vw, 1.5rem);
-    color: #8586ff;
-    font-weight: 600;
+  .card {
+    --depth: calc(var(--pos) * 10px + 14px);
+    position: absolute;
+    inset: 0;
+    z-index: calc(10 - var(--pos));
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8);
+    transform: translate(
+        calc(var(--pos) * 12px + var(--mx) * var(--depth) * -2),
+        calc(var(--pos) * -10px + var(--my) * var(--depth) * -2)
+      )
+      rotate(var(--r));
+    transition:
+      transform 0.9s var(--ease-out),
+      opacity 0.4s,
+      filter 0.6s;
+    filter: brightness(calc(1 - var(--pos) * 0.18));
+    animation: deal 1.1s var(--ease-out) backwards;
+    animation-delay: calc(0.35s + var(--pos) * 0.08s);
   }
 
-  .location {
-    color: var(--text-color);
-    margin-top: 0.5rem;
-  }
-
-  .quick-nav {
-    margin-top: 3rem;
-  }
-
-  .main-cta {
-    background: #080e1f;
-    color: var(--text-color);
-    padding: 0.8rem 1.6rem;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: background 0.2s ease;
-  }
-
-  .main-cta:hover {
-    background: var(--accent-color);
-    color: white;
-  }
-
-  .image-placeholder {
-    background-color: #f0f0f0;
-    border: 2px dashed #ccc;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    text-align: center;
-    color: #888;
-    font-size: 0.85rem;
-  }
-
-  .main-avatar {
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
-  }
-
-  .avatar-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden; 
-  }
-
-  .main-avatar {
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
-  }
-
-  .main-avatar img {
+  .card :global(img) {
     width: 100%;
     height: 100%;
-    object-fit: cover; 
-    object-position: center; 
+    object-fit: cover;
   }
 
-  @media (max-width: 900px) {
-    .hero {
-      grid-template-columns: 1fr;
-      text-align: center;
-      gap: 2rem;
-      padding: 4rem 0;
+  .card.is-leaving {
+    transform: translate(60%, -30%) rotate(24deg);
+    opacity: 0;
+  }
+
+  @keyframes deal {
+    from {
+      opacity: 0;
+      transform: translateY(40%) rotate(0deg) scale(0.9);
     }
-    .main-avatar {
-      max-width: 240px;
-      margin: 0 auto;
-      grid-row: 1;
+  }
+
+  .hero-title {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    font-size: clamp(3.5rem, 12.5vw, 13.5rem);
+    font-weight: 400;
+    line-height: 0.83;
+    letter-spacing: -0.065em;
+    text-transform: uppercase;
+    pointer-events: none;
+    padding-inline: var(--gutter);
+  }
+
+  .line {
+    display: block;
+    overflow: hidden;
+    padding-right: 0.08em;
+    padding-bottom: 0.04em;
+    white-space: nowrap;
+  }
+
+  .line > span {
+    display: inline-block;
+    animation: rise 1.2s var(--ease-out) backwards;
+  }
+
+  .l2 {
+    padding-left: 1.3em;
+  }
+
+  .l2 > span {
+    animation-delay: 0.08s;
+  }
+
+  .l3 {
+    padding-left: 2.35em;
+  }
+
+  .l3 > span {
+    animation-delay: 0.16s;
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(105%);
+    }
+  }
+
+  .hero-meta {
+    position: absolute;
+    bottom: 1.1rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    animation: fade 1s 0.6s backwards;
+  }
+
+  .hero-meta .center {
+    text-align: center;
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* ---------- Statement ---------- */
+
+  .statement {
+    padding-top: clamp(7rem, 14vw, 13rem);
+  }
+
+  .statement-text {
+    max-width: 22ch;
+    margin: 1.25rem 0 2.5rem;
+    font-size: clamp(2rem, 4.6vw, 4.75rem);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+  }
+
+  .statement-text span {
+    color: var(--faint);
+    transition: color 0.4s;
+  }
+
+  .statement-text span.lit {
+    color: var(--fg);
+  }
+
+  /* ---------- Marquee ---------- */
+
+  .marquee {
+    margin-top: clamp(6rem, 12vw, 10rem);
+    overflow: hidden;
+    border-block: 1px solid var(--rule);
+    padding-block: 1.1rem;
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 32s linear infinite;
+  }
+
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+
+  .marquee-group {
+    display: flex;
+  }
+
+  .marquee-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding-right: 1.5rem;
+    font-size: clamp(1.5rem, 3.2vw, 3rem);
+    letter-spacing: -0.035em;
+    white-space: nowrap;
+  }
+
+  .star {
+    color: var(--accent);
+    font-size: 0.5em;
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (max-width: 700px) {
+    .stack {
+      width: 44vw;
+      top: 44%;
+    }
+
+    .l2 {
+      padding-left: 0.6em;
+    }
+
+    .l3 {
+      padding-left: 1.2em;
+    }
+
+    .hero-meta > :first-child,
+    .hero-meta > :last-child {
+      display: none;
+    }
+
+    .hero-meta {
+      justify-content: center;
     }
   }
 </style>

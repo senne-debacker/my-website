@@ -1,159 +1,350 @@
 ---
+import { Image } from "astro:assets";
 import Layout from "../layouts/Layout.astro";
+import portrait from "../assets/tokyo-1.png";
 
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+const facts = [
+  { value: "16", label: "Years in the Chiro" },
+  { value: "200+", label: "Kids & adolescents led" },
+  { value: "35", label: "Co-leaders managed" },
+];
+
+const skills = [
+  {
+    group: "Frontend & Creative Dev",
+    items: ["HTML5 / CSS3 / JavaScript (ES6+)", "TypeScript", "React & Astro", "Git & GitHub"],
+  },
+  {
+    group: "Design & Motion",
+    items: [
+      "UI/UX Design (Figma)",
+      "Prototyping",
+      "Adobe Creative Suite (Illustrator, Photoshop)",
+      "Motion Design (After Effects)",
+    ],
+  },
+];
 ---
 
-<Layout title="About Me">
-  <section class="about-layout animate-fade">
-    <div class="about-main">
-      <h1>About Me</h1>
-      <p class="lead">
-        Hi, I’m Senne, a 22-year-old Creative Developer and Designer based in
-        Buggenhout. I am currently heading into my third and final year of
-        Digital Design & Development (Devine) at Howest Kortrijk.
-      </p>
+<Layout title="About">
+  <section class="about wrap">
+    <p class="label muted">(About)</p>
 
-      <div class="bio-block">
-        <h2>Leadership & Soft Skills</h2>
-        <p>
-          Beyond code and screens, I have spent 16 years in the Chiro (youth
-          movement), serving 4 years as a youth leader and 3 years as the group
-          leader (groepsleider).
-        </p>
-        <p>
-          Leading a group of over 200 kids and adolescents and managing a team
-          of 35 co-leaders taught me skills like communication, crisis
-          management, organization, planning, and mainly: <strong
-            >working as a team</strong
-          >.
-        </p>
-      </div>
+    <div class="intro">
+      <h1 class="headline">
+        <span class="line"><span>Designer</span></span>
+        <span class="line"><span>&amp; creative</span></span>
+        <span class="line"><span>developer</span></span>
+      </h1>
 
-      <div class="bio-block">
-        <h2>Freelance & Collaborations</h2>
-        <p>
-          I am registered as a student-entrepreneur and am currently available
-          for freelance projects (working remotely or on-site).
-        </p>
-      </div>
+      <figure class="portrait" data-reveal>
+        <div class="portrait-inner" data-parallax="0.06">
+          <Image src={portrait} alt="Senne De Backer" widths={[480, 900]} sizes="(max-width: 800px) 70vw, 28vw" />
+        </div>
+        <figcaption class="label muted">Senne De Backer, Buggenhout BE</figcaption>
+      </figure>
+    </div>
 
-      <div class="cta-wrapper">
-        <a href={`${baseUrl}/contact`} class="cta-btn">[ Let's connect ]</a>
+    <div class="cols">
+      <p class="label muted sticky">(Bio)</p>
+      <div class="body">
+        <p class="lead" data-reveal>
+          Hi, I'm Senne, a 22-year-old Creative Developer and Designer based in Buggenhout. I am currently in
+          my third and final year of Digital Design &amp; Development (Devine) at Howest Kortrijk.
+        </p>
+
+        <h2 class="label" data-reveal>Leadership &amp; soft skills</h2>
+        <p data-reveal>
+          Beyond code and screens, I have spent 16 years in the Chiro (youth movement), serving 4 years as a youth
+          leader and 3 years as the group leader (groepsleider).
+        </p>
+        <p data-reveal>
+          Leading a group of over 200 kids and adolescents and managing a team of 35 co-leaders taught me skills
+          like communication, crisis management, organization, planning, and mainly: <strong>working as a team</strong>.
+        </p>
+
+        <h2 class="label" data-reveal>Freelance &amp; collaborations</h2>
+        <p data-reveal>
+          I am registered as a student-entrepreneur and am currently available for freelance projects, working
+          remotely or on-site.
+        </p>
       </div>
     </div>
 
-    <div class="skills-sidebar">
-      <h2>Hard Skills</h2>
+    <ul class="facts">
+      {
+        facts.map((f, i) => (
+          <li class="fact rule" data-reveal style={`--delay:${i * 0.08}s`}>
+            <span class="fact-value" data-count={f.value}>{f.value}</span>
+            <span class="label muted">{f.label}</span>
+          </li>
+        ))
+      }
+    </ul>
 
-      <div class="skill-category">
-        <h3>Frontend & Creative Dev</h3>
-        <ul>
-          <li>HTML5 / CSS3 / JavaScript (ES6+)</li>
-          <li>TypeScript</li>
-          <li>React & Astro</li>
-          <li>Git & GitHub</li>
-        </ul>
-      </div>
+    <section class="skills" aria-labelledby="skills-title">
+      <h2 id="skills-title" class="section-head" data-reveal>
+        <span>Hard</span>
+        <span>Skills</span>
+      </h2>
+      {
+        skills.map((s) => (
+          <div class="skill-group">
+            <h3 class="label muted" data-reveal>{s.group}</h3>
+            <ul>
+              {s.items.map((item, i) => (
+                <li class="skill rule" data-reveal>
+                  <span class="label muted">{String(i + 1).padStart(2, "0")}</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </section>
 
-      <div class="skill-category">
-        <h3>Design & Motion</h3>
-        <ul>
-          <li>UI/UX Design (Figma)</li>
-          <li>Prototyping</li>
-          <li>Adobe Creative Suite (Illustrator, Photoshop)</li>
-          <li>Motion Design (After Effects)</li>
-        </ul>
-      </div>
-    </div>
+    <a href={`${baseUrl}/contact`} class="pill pill--solid cta" data-magnetic="0.25">
+      Let's connect <span class="arrow">→</span>
+    </a>
   </section>
 </Layout>
 
+<script>
+  // Count the numbers up from zero when they scroll into view.
+  document.addEventListener("astro:page-load", () => {
+    const els = document.querySelectorAll<HTMLElement>("[data-count]");
+    if (!els.length || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        io.unobserve(entry.target);
+        const el = entry.target as HTMLElement;
+        const raw = el.dataset.count ?? "";
+        const target = parseInt(raw, 10);
+        const suffix = raw.replace(/^\d+/, "");
+        const start = performance.now();
+        const tick = (now: number) => {
+          const t = Math.min(1, (now - start) / 1400);
+          const eased = 1 - Math.pow(1 - t, 4);
+          el.textContent = `${Math.round(target * eased)}${suffix}`;
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
+    });
+    els.forEach((el) => io.observe(el));
+    document.addEventListener("astro:before-swap", () => io.disconnect(), { once: true });
+  });
+</script>
+
 <style>
-  .about-layout {
+  .about {
+    padding-top: clamp(3rem, 8vw, 7rem);
+  }
+
+  .intro {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 4rem;
-    padding: 3rem 0;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 2rem;
+    margin-top: 1rem;
   }
 
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
+  .headline {
+    font-size: clamp(3.5rem, 11vw, 11.5rem);
+    font-weight: 400;
+    line-height: 0.84;
+    letter-spacing: -0.065em;
+    text-transform: uppercase;
   }
 
-  .avatar-container.main-avatar {
-    width: 24%;
-    max-width: 300px;
-    border-radius: 20%;
-    margin-bottom: 2rem;
-  }
-  
-  h2 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    margin-top: 2rem;
+  .line {
+    display: block;
+    overflow: hidden;
+    padding-right: 0.08em;
+    padding-bottom: 0.04em;
   }
 
-  .lead {
-    font-size: 1.2rem;
-    font-weight: 500;
-    line-height: 1.5;
-    margin-bottom: 2rem;
+  .line > span {
+    display: inline-block;
+    animation: rise 1.2s var(--ease-out) backwards;
   }
 
-  .bio-block p {
-    margin-bottom: 1rem;
+  .line:nth-child(2) {
+    padding-left: 1em;
   }
 
-  .cta-wrapper {
-    margin-top: 3rem;
+  .line:nth-child(2) > span {
+    animation-delay: 0.08s;
   }
 
-  .cta-btn {
-    font-weight: 700;
-    color: #8586ff;
-    font-size: 1.1rem;
+  .line:nth-child(3) > span {
+    animation-delay: 0.16s;
   }
 
-  .skills-sidebar {
-    background: #050914;
-    padding: 2.5rem;
-    border-radius: 12px;
+  @keyframes rise {
+    from {
+      transform: translateY(105%);
+    }
+  }
+
+  .portrait {
+    width: clamp(160px, 22vw, 360px);
+  }
+
+  .portrait-inner {
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .portrait :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 30%;
+    filter: grayscale(1);
+    transition: filter 0.8s var(--ease-out);
+  }
+
+  .portrait:hover :global(img) {
+    filter: none;
+  }
+
+  figcaption {
+    margin-top: 0.6rem;
+  }
+
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    padding-top: clamp(4rem, 9vw, 8rem);
+  }
+
+  .sticky {
+    position: sticky;
+    top: 5rem;
     align-self: start;
   }
 
-  .skills-sidebar h2 {
-    margin-top: 0;
-    font-size: 1.4rem;
-    margin-bottom: 1.5rem;
+  .body {
+    max-width: 42rem;
   }
 
-  .skill-category {
-    margin-bottom: 1.5rem;
+  .body p {
+    font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+    line-height: 1.55;
+    color: #cfccc6;
   }
 
-  .skill-category h3 {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
+  .body p + p {
+    margin-top: 1em;
   }
 
-  .skill-category ul {
-    list-style-type: none;
+  .body .lead {
+    font-size: clamp(1.5rem, 2.4vw, 2.25rem);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--fg);
   }
 
-  .skill-category li {
-    padding: 0.25rem 0;
+  .body h2 {
+    margin: 3rem 0 1rem;
+    font-weight: 400;
+  }
+
+  strong {
+    color: var(--fg);
     font-weight: 500;
   }
 
-  @media (max-width: 900px) {
-    .about-layout {
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1rem, 2vw, 2rem);
+    list-style: none;
+    padding-top: clamp(5rem, 10vw, 9rem);
+  }
+
+  .fact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+  }
+
+  .fact-value {
+    font-size: clamp(4rem, 10vw, 9rem);
+    font-weight: 300;
+    line-height: 0.85;
+    letter-spacing: -0.06em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .skills {
+    padding-top: clamp(6rem, 12vw, 11rem);
+  }
+
+  .skill-group {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    margin-top: clamp(2rem, 5vw, 4rem);
+  }
+
+  .skill-group ul {
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .skill {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    align-items: baseline;
+    padding: 0.75rem 0;
+    font-size: clamp(1.25rem, 2.2vw, 2rem);
+    letter-spacing: -0.03em;
+    transition:
+      padding-left 0.5s var(--ease-out),
+      color 0.3s;
+  }
+
+  .skill:hover {
+    padding-left: 0.75rem;
+    color: var(--accent);
+  }
+
+  .cta {
+    margin-top: clamp(3rem, 6vw, 5rem);
+  }
+
+  @media (max-width: 800px) {
+    .intro {
       grid-template-columns: 1fr;
-      gap: 3rem;
+    }
+
+    .portrait {
+      width: 60vw;
+      justify-self: end;
+    }
+
+    .cols,
+    .skill-group {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .sticky {
+      position: static;
+    }
+
+    .facts {
+      grid-template-columns: 1fr;
     }
   }
 </style>

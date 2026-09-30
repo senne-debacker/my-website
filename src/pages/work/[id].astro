@@ -1,0 +1,370 @@
+---
+import type { GetStaticPaths } from "astro";
+import { Image } from "astro:assets";
+import Layout from "../../layouts/Layout.astro";
+import { projects, pad, type Project } from "../../data/projects";
+
+export const getStaticPaths = (() =>
+  projects.map((project, i) => ({
+    params: { id: project.id },
+    props: { project, index: i },
+  }))) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+  index: number;
+}
+
+const { project: p, index } = Astro.props;
+const next = projects[(index + 1) % projects.length];
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
+const figmaUrl = p.figma.replace("embed.figma.com", "www.figma.com").replace(/&?embed-host=share/, "");
+---
+
+<Layout title={p.title} description={p.tagline}>
+  <article class="project" style={`--p-accent:${p.accent}`}>
+    <div class="wrap">
+      <div class="top label">
+        <a href={`${baseUrl}/work`} class="back">← All work</a>
+        <span class="muted">No. {pad(index + 1)} / {pad(projects.length)}</span>
+      </div>
+
+      <h1 class="title">
+        <span class="title-inner">{p.title}</span>
+      </h1>
+
+      <div class="head-grid">
+        <p class="tagline" data-reveal>{p.tagline}</p>
+        <dl class="meta">
+          <div class="row rule" data-reveal style="--delay:0.05s">
+            <dt class="label muted">Type</dt>
+            <dd class="label">{p.type}</dd>
+          </div>
+          <div class="row rule" data-reveal style="--delay:0.1s">
+            <dt class="label muted">Role</dt>
+            <dd class="label">{p.role}</dd>
+          </div>
+          <div class="row rule" data-reveal style="--delay:0.15s">
+            <dt class="label muted">Context</dt>
+            <dd class="label">{p.context}</dd>
+          </div>
+          <div class="row rule" data-reveal style="--delay:0.2s">
+            <dt class="label muted">Focus</dt>
+            <dd class="label">{p.tags.join(", ")}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="hero-media wrap" data-reveal>
+      <div class="hero-frame">
+        <Image
+          src={p.image}
+          alt={`${p.title} key visual`}
+          widths={[800, 1400, 2200]}
+          sizes="100vw"
+          loading="eager"
+        />
+      </div>
+    </div>
+
+    <div class="story wrap">
+      <p class="label muted sticky">(The project)</p>
+      <div class="story-body">
+        {
+          p.body.map((para, i) => (
+            <p class:list={[{ first: i === 0 }]} data-reveal>
+              {para}
+            </p>
+          ))
+        }
+      </div>
+    </div>
+
+    <section class="proto wrap" aria-labelledby="proto-title">
+      <div class="proto-head rule">
+        <h2 id="proto-title" class="label">Interactive prototype</h2>
+        <a href={figmaUrl} target="_blank" rel="noopener noreferrer" class="label muted open">
+          Open in Figma ↗
+        </a>
+      </div>
+
+      <div class="proto-frame" data-proto={p.figma} data-title={`${p.title} Figma prototype`}>
+        <Image src={p.image} alt="" widths={[800, 1400]} sizes="100vw" class="proto-poster" />
+        <button type="button" class="proto-play" data-cursor="Play" data-magnetic="0.2">
+          <span class="play-icon" aria-hidden="true">▶</span>
+          <span>Launch prototype</span>
+        </button>
+      </div>
+    </section>
+
+    <a href={`${baseUrl}/work/${next.id}`} class="next wrap" data-cursor="Next" style={`--n-accent:${next.accent}`}>
+      <span class="label muted">Next project</span>
+      <span class="next-title">
+        {next.title}
+        <span class="next-arrow">→</span>
+      </span>
+    </a>
+  </article>
+</Layout>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    document.querySelectorAll<HTMLElement>("[data-proto]").forEach((frame) => {
+      frame.querySelector("button")?.addEventListener(
+        "click",
+        () => {
+          const iframe = document.createElement("iframe");
+          iframe.src = frame.dataset.proto!;
+          iframe.title = frame.dataset.title ?? "Figma prototype";
+          iframe.allowFullscreen = true;
+          frame.append(iframe);
+          frame.classList.add("is-live");
+        },
+        { once: true },
+      );
+    });
+  });
+</script>
+
+<style>
+  .project {
+    padding-top: clamp(2rem, 5vw, 4rem);
+  }
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .back {
+    transition: color 0.3s;
+  }
+
+  .back:hover {
+    color: var(--p-accent);
+  }
+
+  .title {
+    overflow: hidden;
+    margin-top: clamp(1.5rem, 4vw, 3rem);
+    font-size: clamp(4.5rem, 18vw, 19rem);
+    font-weight: 400;
+    line-height: 0.8;
+    letter-spacing: -0.07em;
+    text-transform: uppercase;
+    padding-bottom: 0.05em;
+    padding-right: 0.08em;
+  }
+
+  .title-inner {
+    display: inline-block;
+    animation: rise 1.2s var(--ease-out) backwards;
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(105%);
+    }
+  }
+
+  .head-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .tagline {
+    max-width: 20ch;
+    font-size: clamp(1.5rem, 2.6vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1rem;
+    padding: 0.55rem 0 1rem;
+  }
+
+  .hero-media {
+    margin-top: clamp(3rem, 7vw, 6rem);
+  }
+
+  .hero-frame {
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .hero-frame :global(img) {
+    width: 100%;
+  }
+
+  /* Wipe the key visual in from the bottom. */
+  .js .hero-media[data-reveal] {
+    transform: none;
+  }
+
+  .js .hero-media[data-reveal] .hero-frame {
+    clip-path: inset(12% 0 0 0);
+    transition: clip-path 1.4s var(--ease-out);
+  }
+
+  .js .hero-media.is-in .hero-frame {
+    clip-path: inset(0);
+  }
+
+  .story {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    padding-top: clamp(4rem, 9vw, 8rem);
+  }
+
+  .sticky {
+    position: sticky;
+    top: 5rem;
+    align-self: start;
+  }
+
+  .story-body {
+    max-width: 40rem;
+  }
+
+  .story-body p {
+    font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+    line-height: 1.55;
+    color: #cfccc6;
+  }
+
+  .story-body p + p {
+    margin-top: 1.25em;
+  }
+
+  .story-body .first {
+    font-size: clamp(1.5rem, 2.4vw, 2.25rem);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--fg);
+    margin-bottom: 2rem;
+  }
+
+  .proto {
+    padding-top: clamp(4rem, 9vw, 8rem);
+  }
+
+  .proto-head {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 0 1.25rem;
+  }
+
+  .proto-head h2 {
+    font-weight: 400;
+  }
+
+  .open:hover {
+    color: var(--fg);
+  }
+
+  .proto-frame {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .proto-frame :global(.proto-poster) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(14px) brightness(0.45);
+    transform: scale(1.1);
+  }
+
+  .proto-play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: max-content;
+    height: max-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--fg);
+    border-radius: 999px;
+    font-size: 0.9375rem;
+    transition:
+      background-color 0.3s,
+      color 0.3s;
+  }
+
+  .proto-play:hover {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .play-icon {
+    font-size: 0.7em;
+    color: var(--p-accent);
+  }
+
+  .proto-frame :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    z-index: 2;
+    background: var(--surface);
+  }
+
+  .proto-frame.is-live .proto-play {
+    display: none;
+  }
+
+  .next {
+    display: block;
+    margin-top: clamp(6rem, 12vw, 10rem);
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .next-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 0.75rem;
+    font-size: clamp(3.5rem, 12vw, 12rem);
+    line-height: 0.85;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
+    transition: color 0.5s var(--ease-out);
+  }
+
+  .next-arrow {
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .next:hover .next-title {
+    color: var(--n-accent);
+  }
+
+  .next:hover .next-arrow {
+    transform: translateX(0.1em) rotate(-45deg);
+  }
+
+  @media (max-width: 800px) {
+    .head-grid,
+    .story {
+      grid-template-columns: 1fr;
+    }
+
+    .sticky {
+      position: static;
+    }
+  }
+</style>

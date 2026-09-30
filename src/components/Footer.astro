@@ -1,103 +1,178 @@
 ---
+import { email, socials } from "../data/site";
+
 interface Props {
-  isFullPage?: boolean;
+  cta?: boolean;
 }
-const { isFullPage = false } = Astro.props;
+const { cta = true } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
+const year = new Date().getFullYear();
 ---
 
-<footer class={`footer ${isFullPage ? "full-page" : ""}`}>
-  <div class="footer-container">
-    <div class="footer-section identity">
-      <h3>Senne De Backer</h3>
-      <p class="muted">Buggenhout, Belgium</p>
+<footer class="footer">
+  <div class="wrap">
+    {
+      cta && (
+        <a href={`${baseUrl}/contact`} class="cta" data-cursor="Say hi" data-reveal>
+          <span class="label muted">Have a project in mind?</span>
+          <span class="cta-title">
+            Let's work
+            <br />
+            together <span class="cta-arrow">→</span>
+          </span>
+        </a>
+      )
+    }
+
+    <div class="cols rule">
+      <div>
+        <p class="label muted">Contact</p>
+        <a href={`mailto:${email}`} class="link">{email}</a>
+      </div>
+      <div>
+        <p class="label muted">Socials</p>
+        <ul>
+          {
+            socials.map((s) => (
+              <li>
+                <a href={s.href} target="_blank" rel="noopener noreferrer" class="link">
+                  {s.label} ↗
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div>
+        <p class="label muted">Based in</p>
+        <p>Buggenhout, Belgium</p>
+        <p class="muted tabular"><span data-clock>--:--:--</span> local time</p>
+      </div>
+      <div class="status">
+        <p class="label muted">Status</p>
+        <p><span class="dot" aria-hidden="true"></span>Available for freelance</p>
+      </div>
     </div>
 
-    <div class="footer-section contact">
-      <p>
-        <strong>E-mail:</strong>
-        <a href="mailto:design.debacker@gmail.com">design.debacker@gmail.com</a>
-      </p>
-    </div>
-
-    <div class="footer-section socials">
-      <a
-        href="https://github.com/senne-debacker"
-        target="_blank"
-        rel="noopener noreferrer">GitHub</a
-      >
-      <a href="https://www.linkedin.com/in/senne-de-backer-3b945642b" target="_blank" rel="noopener noreferrer">LinkedIn</a
-      >
-      <a
-        href="https://www.instagram.com/debacker_devine/"
-        target="_blank"
-        rel="noopener noreferrer">Instagram</a
-      >
+    <div class="bottom label">
+      <span>Senne De Backer</span>
+      <span class="muted">Designed &amp; built in Belgium</span>
+      <button type="button" data-to-top class="to-top">Back to top ↑</button>
+      <span>©{year}</span>
     </div>
   </div>
 </footer>
 
 <style>
   .footer {
-    padding: 3rem 1.5rem;
-    width: 100%;
-    background: #050914;
+    margin-top: clamp(6rem, 14vw, 12rem);
+    padding-bottom: 1.25rem;
   }
 
-  .footer.full-page {
-    border-top: none;
-    background: transparent;
-    padding: 0;
+  .cta {
+    display: block;
+    padding-bottom: clamp(3rem, 8vw, 6rem);
   }
 
-  .footer-container {
-    max-width: var(--max-width);
-    margin: 0 auto;
+  .cta-title {
+    display: block;
+    margin-top: 1rem;
+    font-size: clamp(3.25rem, 11vw, 11rem);
+    line-height: 0.86;
+    letter-spacing: -0.055em;
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+
+  .cta-arrow {
+    display: inline-block;
+    color: var(--accent);
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .cta:hover .cta-arrow {
+    transform: translateX(0.15em) rotate(-45deg);
+  }
+
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    padding-block: 1.25rem 4rem;
+  }
+
+  .cols p:not(.label),
+  .cols li,
+  .cols a {
+    font-size: 0.9375rem;
+  }
+
+  .cols .label {
+    margin-bottom: 0.75rem;
+  }
+
+  ul {
+    list-style: none;
+  }
+
+  .link {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.5s var(--ease-out);
+  }
+
+  .link:hover {
+    background-size: 100% 1px;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+    border-radius: 50%;
+    background: #3ddc84;
+    box-shadow: 0 0 0 0 rgba(61, 220, 132, 0.6);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    70% {
+      box-shadow: 0 0 0 7px rgba(61, 220, 132, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(61, 220, 132, 0);
+    }
+  }
+
+  .bottom {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 2rem;
+    align-items: end;
+    gap: 1rem;
   }
 
-  .footer.full-page .footer-container {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 2.5rem;
+  .to-top {
+    text-transform: inherit;
+    letter-spacing: inherit;
   }
 
-  .footer-section h3 {
-    font-size: 1.2rem;
-    margin-bottom: 0.25rem;
+  .to-top:hover {
+    color: var(--accent);
   }
 
-  .muted {
-    color: var(--text-color);
-    font-size: 0.9rem;
-  }
-
-  .socials {
-    display: flex;
-    gap: 1.5rem;
-  }
-
-  .footer.full-page .socials {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .disabled {
-    color: var(--text-muted);
-    pointer-events: none;
-  }
-
-  @media (max-width: 768px) {
-    .footer-container {
-      flex-direction: column;
-      gap: 1.5rem;
+  @media (max-width: 800px) {
+    .cols {
+      grid-template-columns: 1fr 1fr;
+      row-gap: 2.5rem;
     }
-    .socials {
-      flex-wrap: wrap;
+
+    .bottom .muted {
+      display: none;
     }
   }
 </style>

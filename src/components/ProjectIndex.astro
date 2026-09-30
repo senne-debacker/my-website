@@ -1,0 +1,271 @@
+---
+import { Image } from "astro:assets";
+import { projects, pad } from "../data/projects";
+
+interface Props {
+  heading?: string;
+}
+const { heading = "Index" } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<section class="index wrap" data-index aria-label="All projects">
+  <h2 class="section-head" data-reveal>
+    <span>{pad(projects.length)}</span>
+    <span>{heading}</span>
+  </h2>
+
+  <ul class="list">
+    {
+      projects.map((p, i) => (
+        <li data-reveal style={`--delay:${i * 0.06}s`}>
+          <a
+            href={`${baseUrl}/work/${p.id}`}
+            class="row"
+            data-cursor="View"
+            data-index-item={i}
+            style={`--p-accent:${p.accent}`}
+          >
+            <span class="num label">No—{pad(i + 1)}</span>
+            <span class="name">{p.title}</span>
+            <span class="type label muted">{p.type}</span>
+            <span class="role label muted">{p.role}</span>
+            <span class="go" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="preview" aria-hidden="true" data-index-preview>
+    {
+      projects.map((p, i) => (
+        <div class="preview-img" data-preview={i}>
+          <Image src={p.image} alt="" widths={[480, 800]} sizes="26vw" />
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<script>
+  let controller: AbortController | null = null;
+
+  document.addEventListener("astro:page-load", () => {
+    controller?.abort();
+    const root = document.querySelector<HTMLElement>("[data-index]");
+    const preview = root?.querySelector<HTMLElement>("[data-index-preview]");
+    if (!root || !preview) return;
+
+    controller = new AbortController();
+    const { signal } = controller;
+    const list = root.querySelector<HTMLElement>(".list")!;
+    const images = [...preview.querySelectorAll<HTMLElement>("[data-preview]")];
+    const fine = window.matchMedia("(pointer: fine)").matches;
+
+    let x = 0,
+      y = 0,
+      px = 0,
+      py = 0,
+      frame = 0,
+      active = false;
+
+    const loop = () => {
+      const dx = x - px;
+      px += dx * 0.12;
+      py += (y - py) * 0.12;
+      // Tilt slightly in the direction of travel.
+      const tilt = Math.max(-8, Math.min(8, dx * 0.05));
+      preview.style.transform = `translate3d(${px}px, ${py}px, 0) rotate(${tilt}deg)`;
+      frame = active || Math.abs(dx) > 0.5 ? requestAnimationFrame(loop) : 0;
+    };
+
+    list.addEventListener(
+      "pointermove",
+      (e) => {
+        x = e.clientX;
+        y = e.clientY;
+        if (!frame && fine) frame = requestAnimationFrame(loop);
+      },
+      { signal },
+    );
+
+    list.querySelectorAll<HTMLElement>("[data-index-item]").forEach((row) => {
+      row.addEventListener(
+        "pointerenter",
+        (e) => {
+          const i = Number(row.dataset.indexItem);
+          list.classList.add("is-hovering");
+          row.classList.add("is-active");
+          images.forEach((img, n) => img.classList.toggle("is-active", n === i));
+          if (fine && !active) {
+            // Snap into place on first enter so it doesn't fly in from the corner.
+            px = x = e.clientX;
+            py = y = e.clientY;
+          }
+          active = true;
+          preview.classList.toggle("is-visible", fine);
+          if (!frame && fine) frame = requestAnimationFrame(loop);
+        },
+        { signal },
+      );
+      row.addEventListener("pointerleave", () => row.classList.remove("is-active"), { signal });
+      row.addEventListener("focus", () => list.classList.add("is-hovering"), { signal });
+      row.addEventListener("blur", () => list.classList.remove("is-hovering"), { signal });
+    });
+
+    list.addEventListener(
+      "pointerleave",
+      () => {
+        active = false;
+        list.classList.remove("is-hovering");
+        preview.classList.remove("is-visible");
+      },
+      { signal },
+    );
+
+    signal.addEventListener("abort", () => cancelAnimationFrame(frame));
+  });
+</script>
+
+<style>
+  .index {
+    padding-top: clamp(6rem, 12vw, 11rem);
+  }
+
+  .list {
+    list-style: none;
+    margin-top: clamp(2rem, 4vw, 3.5rem);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr 12rem 14rem 2rem;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-top: 1px solid var(--rule);
+    transition: opacity 0.5s var(--ease-out);
+  }
+
+  .name {
+    font-size: clamp(2.5rem, 7vw, 6.5rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    transition:
+      transform 0.6s var(--ease-out),
+      color 0.4s;
+  }
+
+  .go {
+    justify-self: end;
+    font-size: 1.5rem;
+    opacity: 0;
+    transform: translateX(-12px);
+    transition:
+      opacity 0.4s,
+      transform 0.6s var(--ease-out);
+  }
+
+  /* Like the HUYML list: everything fades back except the row you're on. */
+  .list.is-hovering .row {
+    opacity: 0.22;
+  }
+
+  .list.is-hovering .row.is-active,
+  .list.is-hovering .row:focus-visible {
+    opacity: 1;
+  }
+
+  .row.is-active .name,
+  .row:focus-visible .name {
+    transform: translateX(0.25em);
+    color: var(--p-accent);
+  }
+
+  .row.is-active .go,
+  .row:focus-visible .go {
+    opacity: 1;
+    transform: none;
+  }
+
+  .preview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    width: clamp(220px, 26vw, 420px);
+    aspect-ratio: 16 / 10;
+    margin: calc(clamp(220px, 26vw, 420px) * -0.3125) 0 0 calc(clamp(220px, 26vw, 420px) * -0.5);
+    pointer-events: none;
+    opacity: 0;
+    scale: 0.85;
+    transition:
+      opacity 0.35s,
+      scale 0.6s var(--ease-out);
+  }
+
+  .preview.is-visible {
+    opacity: 1;
+    scale: 1;
+  }
+
+  .preview-img {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    clip-path: inset(100% 0 0 0);
+    transition: clip-path 0.6s var(--ease-out);
+  }
+
+  .preview-img.is-active {
+    clip-path: inset(0);
+    z-index: 1;
+  }
+
+  .preview-img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 900px) {
+    .row {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "num num"
+        "name go"
+        "type type";
+      row-gap: 0.35rem;
+      padding: 1rem 0 1.25rem;
+    }
+
+    .num {
+      grid-area: num;
+    }
+
+    .name {
+      grid-area: name;
+    }
+
+    .type {
+      grid-area: type;
+    }
+
+    .role {
+      display: none;
+    }
+
+    .go {
+      grid-area: go;
+      opacity: 1;
+      transform: none;
+    }
+
+    .preview {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,134 @@
+---
+// A trailing ring that follows the pointer. Over an element with
+// data-cursor="Label" it grows into a pill showing that label.
+// The native cursor stays visible; this is decoration on top of it.
+---
+
+<div class="cursor" aria-hidden="true" transition:persist="cursor">
+  <span class="cursor-label"></span>
+</div>
+
+<script>
+  const el = document.querySelector<HTMLElement>(".cursor");
+  const label = el?.querySelector<HTMLElement>(".cursor-label");
+  const fine = window.matchMedia("(pointer: fine)").matches;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (el && label && fine && !reduced) {
+    let x = -100,
+      y = -100,
+      cx = -100,
+      cy = -100;
+
+    document.addEventListener("pointermove", (e) => {
+      x = e.clientX;
+      y = e.clientY;
+      el.classList.add("is-visible");
+    });
+    document.documentElement.addEventListener("pointerleave", () =>
+      el.classList.remove("is-visible"),
+    );
+
+    // Event delegation keeps working after ClientRouter swaps the page.
+    document.addEventListener("pointerover", (e) => {
+      const target = (e.target as Element).closest<HTMLElement>(
+        "[data-cursor], a, button",
+      );
+      const text = target?.dataset.cursor;
+      el.classList.toggle("is-label", Boolean(text));
+      el.classList.toggle("is-hover", Boolean(target) && !text);
+      if (text) label.textContent = text;
+    });
+
+    document.addEventListener("astro:after-swap", () =>
+      el.classList.remove("is-label", "is-hover"),
+    );
+
+    const loop = () => {
+      cx += (x - cx) * 0.2;
+      cy += (y - cy) * 0.2;
+      el.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
+      requestAnimationFrame(loop);
+    };
+    loop();
+  }
+</script>
+
+<style>
+  .cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0;
+    mix-blend-mode: difference;
+    transition: opacity 0.3s;
+  }
+
+  .cursor.is-label {
+    mix-blend-mode: normal;
+  }
+
+  .cursor.is-visible {
+    opacity: 1;
+  }
+
+  .cursor::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--fg);
+    border-radius: 999px;
+    translate: -50% -50%;
+    transition:
+      width 0.4s var(--ease-out),
+      height 0.4s var(--ease-out),
+      background-color 0.4s var(--ease-out),
+      opacity 0.3s;
+  }
+
+  .cursor.is-hover::before {
+    width: 56px;
+    height: 56px;
+    background: var(--fg);
+  }
+
+  .cursor.is-label::before {
+    width: 88px;
+    height: 88px;
+    background: var(--fg);
+    border-color: var(--fg);
+  }
+
+  .cursor-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    translate: -50% -50%;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--bg);
+    opacity: 0;
+    scale: 0.6;
+    transition:
+      opacity 0.3s,
+      scale 0.4s var(--ease-out);
+  }
+
+  .cursor.is-label .cursor-label {
+    opacity: 1;
+    scale: 1;
+  }
+
+  @media (pointer: coarse) {
+    .cursor {
+      display: none;
+    }
+  }
+</style>

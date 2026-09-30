@@ -1,122 +1,333 @@
 ---
+import { Image } from "astro:assets";
 import Layout from "../layouts/Layout.astro";
+import { projects, pad } from "../data/projects";
 
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
 
-<Layout title="My Work">
-  <section class="page-section">
-    <div class="page-header">
-      <h1>My Work</h1>
-      <p class="lead">
-        A curated selection of design iterations, interactive frameworks, and
-        digital architectures.
+<Layout title="Work">
+  <section class="work">
+    <div class="intro wrap">
+      <p class="label muted" data-reveal>(Selected work)</p>
+      <p class="lead" data-reveal style="--delay:0.08s">
+        A curated selection of design iterations, interactive frameworks and digital architectures.
       </p>
     </div>
 
-    <div class="work-grid">
-      <!-- Project 1 -->
-      <a href={`${baseUrl}/work/1`} class="work-card">
-        <div class="image-container">
-          <img
-            src={`${baseUrl}/images/thrive-hero.png`}
-            alt="Thrive Pedal Play Project"
-            loading="lazy"
-          />
-        </div>
-        <div class="card-meta">
-          <h3>Thrive Pedal Play Project</h3>
-          <p>View detailed case study &rarr;</p>
-        </div>
-      </a>
+    <div class="gallery" data-gallery>
+      <ul class="track" data-track>
+        {
+          projects.map((p, i) => (
+            <li class="slide" data-reveal style={`--delay:${i * 0.08}s; --p-accent:${p.accent}`}>
+              <a href={`${baseUrl}/work/${p.id}`} class="card" data-cursor="View" draggable="false">
+                <div class="media">
+                  <Image
+                    src={p.image}
+                    alt={`${p.title} preview`}
+                    widths={[480, 800, 1200]}
+                    sizes="(max-width: 700px) 85vw, 52vw"
+                    loading={i < 2 ? "eager" : "lazy"}
+                    draggable="false"
+                  />
+                  <span class="num label">No—{pad(i + 1)}</span>
+                </div>
+                <div class="caption">
+                  <span class="title label">{p.title}</span>
+                  <span class="label muted">{p.type}</span>
+                </div>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
 
-      <!-- Project 2 -->
-      <a href={`${baseUrl}/work/2`} class="work-card">
-        <div class="image-container">
-          <img
-            src={`${baseUrl}/images/lumen-hero.png`}
-            alt="Project One Preview"
-            loading="lazy"
-          />
+      <div class="controls wrap">
+        <div class="progress" aria-hidden="true"><span data-progress></span></div>
+        <div class="buttons">
+          <button type="button" class="round" data-prev aria-label="Previous project">←</button>
+          <button type="button" class="round" data-next aria-label="Next project">→</button>
         </div>
-        <div class="card-meta">
-          <h3>Antwerp Campaign Website</h3>
-          <p>View detailed case study &rarr;</p>
-        </div>
-      </a>
-
-      <!-- Project 3 -->
-      <a href={`${baseUrl}/work/3`} class="work-card">
-        <div class="image-container">
-          <img
-            src={`${baseUrl}/images/type01-hero.png`}
-            alt="Project One Preview"
-            loading="lazy"
-          />
-        </div>
-        <div class="card-meta">
-        <h3>TYPE01 Conference Website</h3>
-          <p>View detailed case study &rarr;</p>
-        </div>
-      </a>
+      </div>
     </div>
+
+    <h1 class="section-head wrap title-bar" data-reveal>
+      <span>{pad(projects.length)}</span>
+      <span>Work</span>
+    </h1>
   </section>
 </Layout>
 
+<script>
+  let controller: AbortController | null = null;
+
+  document.addEventListener("astro:page-load", () => {
+    controller?.abort();
+    const gallery = document.querySelector<HTMLElement>("[data-gallery]");
+    if (!gallery) return;
+    controller = new AbortController();
+    const { signal } = controller;
+
+    const track = gallery.querySelector<HTMLElement>("[data-track]")!;
+    const prev = gallery.querySelector<HTMLButtonElement>("[data-prev]")!;
+    const next = gallery.querySelector<HTMLButtonElement>("[data-next]")!;
+    const bar = gallery.querySelector<HTMLElement>("[data-progress]")!;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const step = () => {
+      const slide = track.querySelector<HTMLElement>(".slide");
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      return (slide?.offsetWidth ?? 300) + gap;
+    };
+
+    const sync = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      const ratio = max > 0 ? track.scrollLeft / max : 1;
+      const visible = max > 0 ? track.clientWidth / track.scrollWidth : 1;
+      bar.style.width = `${visible * 100}%`;
+      bar.style.left = `${ratio * (1 - visible) * 100}%`;
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft >= max - 2;
+    };
+
+    const go = (dir: number) =>
+      track.scrollBy({ left: dir * step(), behavior: reduced ? "auto" : "smooth" });
+
+    prev.addEventListener("click", () => go(-1), { signal });
+    next.addEventListener("click", () => go(1), { signal });
+    track.addEventListener("scroll", sync, { passive: true, signal });
+    window.addEventListener("resize", sync, { signal });
+    track.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key === "ArrowRight") go(1);
+        if (e.key === "ArrowLeft") go(-1);
+      },
+      { signal },
+    );
+    sync();
+
+    // Drag to scroll with a mouse. Clicks still work unless the pointer actually moved.
+    let down = false,
+      startX = 0,
+      startLeft = 0,
+      moved = false;
+
+    track.addEventListener(
+      "pointerdown",
+      (e) => {
+        if (e.pointerType !== "mouse" || e.button !== 0) return;
+        down = true;
+        moved = false;
+        startX = e.clientX;
+        startLeft = track.scrollLeft;
+      },
+      { signal },
+    );
+    window.addEventListener(
+      "pointermove",
+      (e) => {
+        if (!down) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 5 && !moved) {
+          moved = true;
+          track.classList.add("is-dragging");
+        }
+        if (moved) track.scrollLeft = startLeft - dx;
+      },
+      { signal },
+    );
+    window.addEventListener(
+      "pointerup",
+      () => {
+        down = false;
+        track.classList.remove("is-dragging");
+      },
+      { signal },
+    );
+    track.addEventListener(
+      "click",
+      (e) => {
+        if (moved) {
+          e.preventDefault();
+          moved = false;
+        }
+      },
+      { capture: true, signal },
+    );
+  });
+</script>
+
 <style>
-  .page-section {
-    padding: 3rem 0;
+  .work {
+    padding-top: clamp(3rem, 8vw, 7rem);
   }
-  .page-header {
-    margin-bottom: 3rem;
-  }
-  .page-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-  }
+
   .lead {
-    color: var(--text-color);
-    font-size: 1.1rem;
+    max-width: 24ch;
+    margin-top: 1rem;
+    font-size: clamp(1.75rem, 3.6vw, 3.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
   }
-  .work-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2.5rem;
+
+  .gallery {
+    margin-top: clamp(3rem, 7vw, 6rem);
   }
-  .work-card {
+
+  .track {
+    display: flex;
+    gap: clamp(0.75rem, 1.5vw, 1.25rem);
+    overflow-x: auto;
+    list-style: none;
+    padding-inline: var(--gutter);
+    scroll-padding-inline: var(--gutter);
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    cursor: grab;
+  }
+
+  .track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .track.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+  }
+
+  .track.is-dragging .card {
+    pointer-events: none;
+  }
+
+  .slide {
+    flex: 0 0 clamp(280px, 52vw, 900px);
+    scroll-snap-align: start;
+  }
+
+  .card {
     display: block;
-    background: #050914;
-    border: none;
-    border-radius: 12px;
+    user-select: none;
+  }
+
+  .media {
+    position: relative;
+    aspect-ratio: 7 / 4;
     overflow: hidden;
-    transition:
-      transform 0.2s ease,
-      box-shadow 0.2s ease;
+    background: var(--surface);
   }
-  .work-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.04);
+
+  .media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.2s var(--ease-out);
   }
-  .iframe-placeholder {
-    background-color: #f0f0f0;
-    border-bottom: 1px solid var(--border-color);
-    aspect-ratio: 16 / 9;
+
+  .card:hover .media :global(img) {
+    transform: scale(1.04);
+  }
+
+  .num {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.3em 0.55em;
+    border-radius: 3px;
+    background: rgba(5, 5, 5, 0.7);
+    backdrop-filter: blur(6px);
+    font-size: 0.625rem;
+  }
+
+  .media::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 3px;
+    background: var(--p-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.7s var(--ease-out);
+  }
+
+  .card:hover .media::after {
+    transform: none;
+  }
+
+  .caption {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    padding-top: 0.9rem;
+    text-align: center;
+  }
+
+  .title {
+    font-size: 0.75rem;
+  }
+
+  .controls {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: #888;
-    font-size: 0.85rem;
+    gap: 2rem;
+    margin-top: 2.5rem;
   }
-  .card-meta {
-    padding: 1.5rem;
-    
+
+  .progress {
+    position: relative;
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
   }
-  .card-meta h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.25rem;
+
+  .progress span {
+    position: absolute;
+    top: -1px;
+    height: 3px;
+    background: var(--fg);
+    transition:
+      left 0.2s linear,
+      width 0.2s linear;
   }
-  .card-meta p {
-    font-size: 0.85rem;
-    color: #8586ff;
+
+  .buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .round {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--fg);
+    border-radius: 50%;
+    font-size: 1rem;
+    transition:
+      background-color 0.3s,
+      color 0.3s,
+      opacity 0.3s;
+  }
+
+  .round:hover:not(:disabled) {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .round:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+
+  .title-bar {
+    margin-top: clamp(4rem, 9vw, 8rem);
+    font-size: clamp(4rem, 13vw, 13rem);
+  }
+
+  @media (max-width: 700px) {
+    .slide {
+      flex-basis: 85vw;
+    }
   }
 </style>
