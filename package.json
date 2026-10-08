@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:fisherman": "npm --prefix fisherman ci && npm --prefix fisherman run build && rm -rf dist/fisherman && cp -R fisherman/dist dist/fisherman",
     "preview": "astro preview",
     "astro": "astro"
   },
