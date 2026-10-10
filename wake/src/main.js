@@ -14,6 +14,7 @@ import { createRain } from './scene/rain.js'
 import { createClock } from './world/clock.js'
 import { createAtmosphere } from './world/atmosphere.js'
 import { createWeather } from './world/weather.js'
+import { QUALITY } from './quality.js'
 import { setupTouchMode, isTouch } from './touch.js'
 import { createDolphins } from './scene/dolphin.js'
 import { createLightning } from './world/lightning.js'
@@ -47,7 +48,7 @@ async function main() {
 
   // --- Renderer ---------------------------------------------------------------
   const renderer = new WebGPURenderer({ antialias: true })
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
+  renderer.setPixelRatio(QUALITY.pixelRatio)
   renderer.setSize(innerWidth, innerHeight)
   renderer.toneMapping = ACESFilmicToneMapping
   document.querySelector('#app').appendChild(renderer.domElement)

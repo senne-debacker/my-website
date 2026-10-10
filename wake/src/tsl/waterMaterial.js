@@ -10,6 +10,7 @@ import { simplex3d } from './simplexNoise.js'
 import { lampPool } from './lampPool.js'
 import { rainHeight, surfaceBump } from './raindrops.js'
 import { wakeWaves } from './wakeWaves.js'
+import { QUALITY } from '../quality.js'
 import { fishShadow } from './fishShadows.js'
 
 export function createWaterMaterial(fish) {
@@ -67,7 +68,7 @@ export function createWaterMaterial(fish) {
   // the ripples catch the sun, moon and lamp, and lightens the water colour on them a little.
   // The boat's wake waves (tsl/wakeWaves.js) are a second height field on the same surface, so
   // both bump the normal together and both lighten the crests.
-  const waves = wakeWaves(fragmentDir)
+  const waves = QUALITY.wakeWaves ? wakeWaves(fragmentDir) : float(0) // off on phones (the foam wash still shows)
   const rainOnly = rainHeight(fragmentDir)
   const bump = surfaceBump(rainOnly.add(waves))
   material.normalNode = bump.xyz

@@ -914,3 +914,9 @@ body.touch .menu-foot {
     --ui: 0.55;
   }
 }
+
+/* Touch mode: the menu and mute buttons go to the top right, out of reach of the thumb pads. */
+body.touch #right {
+  top: max(14px, env(safe-area-inset-top));
+  right: env(safe-area-inset-right);
+}

@@ -285,6 +285,10 @@ User asked for: start/pause screen, better driving interface, heavier boat, horn
 - Checked in headless Chrome with mobile emulation (844 x 390, touch emulation, real `Input.dispatchTouchEvent`): body gets `touch`; tap Set sail; holding forward + right with two fingers: speed 0.67, throttle 1, steer 1; plus the boost finger: 1.06 and `boost` true; all released: throttle 0, boost false; one-finger drag looks round; the menu button pauses; screenshots of title, HUD, pause. Desktop (`?desktop`): `#touch` has `display: none`, HUD unchanged
 - NOT checked: a real phone (Safari / Android Chrome: WebGPU support, performance, the notch), portrait orientation, the layout on tablets. The game is heavy (per-pixel wake, rain and fish loops): expect a low frame rate on weak GPUs; there is no quality setting yet
 
+### Step 26 — Touch fixes: landscape, low quality  *(done)*
+- [x] Landscape bug (user: "doesn't work in landscape", portrait fine): the menu / mute strips (`#right`, `top: 170px`) sat at the right edge at the height of the forward button, so on a short screen their ~28 px overlapped the button's edge and a thumb on the forward button paused the game. In touch mode `#right` is now at the top right (`body.touch #right`, safe-area aware). My earlier emulated landscape tests (844 x 390) worked because the overlap is only a few pixels there; found by looking at the 740 x 340 screenshot. Checked 844x390, 740x340, 568x320 and a portrait -> landscape rotation at run time (canvas resizes, pads work)
+- [x] Choppy on phones: `src/quality.js` `QUALITY` (low when touch, `?low` / `?high` override): renderer pixel ratio 1 (a 3x phone at the old cap of 2 drew 4x the layout pixels; now 1x) and `wakeWaves` off (the per-pixel wake wave sum; the foam wash and bow splash stay). Not measured on a phone (this machine's GPU is not representative); the other per-pixel costs (fish shadows loop over 120 fish, bloom, rain ripples) are unchanged. Next levers if still slow: fewer fish in the shader loop, no bloom, `PLANET.detail`, fewer rain streaks
+
 ## Final requirements check (re-run before handing in)
 
 ```
@@ -303,6 +307,7 @@ npm run check                                                                   
 
 ## Progress log
 
+- 2026-10-10: Step 26: landscape fix (menu/mute strips moved), low quality mode on phones.
 - 2026-10-10: Step 25: touch mode with on-screen pads (hidden on desktop).
 - 2026-10-09: Step 24: leaping dolphins (procedural fallback, GLB loader, shader bend instead of a rig). Real model not received yet.
 - 2026-10-09: Step 23: lightning and thunder in storms.
