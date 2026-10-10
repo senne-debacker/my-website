@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Wake</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <meta name="description" content="A low-poly fishing boat on a tiny ocean planet: Three.js WebGPURenderer, TSL, and a ported Shadertoy simplex noise." />
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <!-- Icon sprite: drawn with the current text colour. -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5.9 1.2.9 2V16h5.4v-.2c0-.8.3-1.5.9-2A6 6 0 0 0 12 3z" /></symbol>
+      <symbol id="i-anchor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2" /><path d="M12 7v14M7.5 11h9M5 15c.3 3.5 3.3 6 7 6s6.7-2.5 7-6M5 15l-2.2 1.2M19 15l2.2 1.2" /></symbol>
+      <symbol id="i-horn" viewBox="0 0 24 24"><path d="M3 10v4h3.5L14 18.5v-13L6.5 10H3z" /><path d="M17 9.5a3.5 3.5 0 0 1 0 5M19.5 7a7 7 0 0 1 0 10" /></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.7-7 10-7 10 7 10 7-3.7 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" /></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3.5 2" /></symbol>
+      <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 17a8 8 0 1 1 16 0M12 17l4.5-6M6 17h1.5M16.5 17H18" /></symbol>
+      <symbol id="i-waves" viewBox="0 0 24 24"><path d="M2 9c2.5-2.5 4.5 2.5 7 0s4.5 2.5 7 0 4.5 2.5 6 0M2 15c2.5-2.5 4.5 2.5 7 0s4.5 2.5 7 0 4.5 2.5 6 0" /></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14" /></symbol>
+      <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M4 9.5v5h4l5 4v-13l-5 4H4z" /><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a8 8 0 0 1 0 11" /></symbol>
+      <symbol id="i-left" viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5" /></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><path d="M9.5 5.5L16 12l-6.5 6.5" /></symbol>
+      <symbol id="i-up" viewBox="0 0 24 24"><path d="M5.5 14.5L12 8l6.5 6.5" /></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="M5.5 9.5L12 16l6.5-6.5" /></symbol>
+      <symbol id="i-muted" viewBox="0 0 24 24"><path d="M4 9.5v5h4l5 4v-13l-5 4H4z" /><path d="M16 9.5l5 5M21 9.5l-5 5" /></symbol>
+    </svg>
+
+    <!-- In-game interface (hidden on the start screen). -->
+    <div id="hud" class="off">
+      <div id="dial">
+        <svg id="dial-ring" viewBox="-110 0 220 100" aria-hidden="true">
+          <g transform="translate(0 -8)">
+            <circle r="92" fill="none" stroke="rgba(4,7,10,0.78)" stroke-width="12" />
+            <g id="dial-phases"></g>
+          </g>
+        </svg>
+        <div id="dial-anchor"><svg class="icon"><use href="#i-anchor" /></svg></div>
+        <div id="dial-pill">
+          <span id="dial-day">Monday, Day 1</span>
+          <b id="dial-time">--:--</b>
+        </div>
+        <div id="compass">
+          <svg id="compass-dial" viewBox="-30 -30 60 60" aria-hidden="true">
+            <circle r="27" fill="#0b1118" stroke="#e8e2d4" stroke-width="2" />
+            <path d="M0 -21L-5 0H5z" fill="#d8503c" />
+            <path d="M0 21L-5 0H5z" fill="#e8e2d4" />
+            <text font-size="9" fill="#fff" text-anchor="middle" transform="translate(0 -9)">N</text>
+            <text font-size="8" fill="#e8e2d4" text-anchor="middle" transform="rotate(90) translate(0 -9)">E</text>
+            <text font-size="8" fill="#e8e2d4" text-anchor="middle" transform="rotate(180) translate(0 -9)">S</text>
+            <text font-size="8" fill="#e8e2d4" text-anchor="middle" transform="rotate(270) translate(0 -9)">W</text>
+          </svg>
+          <i id="compass-bow"></i>
+        </div>
+      </div>
+
+      <div id="toast"></div>
+
+      <div id="left">
+        <div class="strip" id="strip-camera" data-key="KeyC"><svg class="icon"><use href="#i-eye" /></svg><span class="key">C</span><span class="strip-label" id="camera-label">Chase</span></div>
+        <div class="strip" id="strip-boost" data-key="ShiftLeft" data-hold><svg class="icon"><use href="#i-gauge" /></svg><span class="key wide">Shift</span><span class="strip-label">Boost</span></div>
+        <div class="strip" id="strip-time" data-key="KeyT" data-hold><svg class="icon"><use href="#i-clock" /></svg><span class="key">T</span><span class="strip-label">Hold</span></div>
+        <div id="tools">
+          <div class="tool" id="tool-lamp" data-key="KeyL"><div class="diamond"><svg class="icon"><use href="#i-bulb" /></svg></div><span class="key">L</span></div>
+          <div class="tool" id="tool-anchor" data-key="Space"><div class="diamond"><svg class="icon"><use href="#i-anchor" /></svg></div><span class="key wide">Space</span></div>
+          <div class="tool" id="tool-horn" data-key="KeyH" data-hold><div class="diamond"><svg class="icon"><use href="#i-horn" /></svg></div><span class="key">H</span></div>
+          <div id="stats">
+            <div class="stat"><svg class="icon"><use href="#i-gauge" /></svg><b id="stat-speed">0</b><small>kn</small></div>
+            <div class="stat"><svg class="icon"><use href="#i-waves" /></svg><b id="stat-sea" class="good">Calm</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Touch controls (only shown in touch mode, see touch.js): the same actions as the keys. -->
+      <div id="touch">
+        <div class="pad" id="pad-steer">
+          <div class="tbtn" data-key="KeyA" data-hold aria-label="Steer left"><svg class="icon"><use href="#i-left" /></svg></div>
+          <div class="tbtn" data-key="KeyD" data-hold aria-label="Steer right"><svg class="icon"><use href="#i-right" /></svg></div>
+        </div>
+        <div class="pad" id="pad-drive">
+          <div class="tbtn small" id="touch-boost" data-key="ShiftLeft" data-hold aria-label="Boost"><svg class="icon"><use href="#i-gauge" /></svg></div>
+          <div class="column">
+            <div class="tbtn" data-key="KeyW" data-hold aria-label="Forward"><svg class="icon"><use href="#i-up" /></svg></div>
+            <div class="tbtn" data-key="KeyS" data-hold aria-label="Reverse"><svg class="icon"><use href="#i-down" /></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="right">
+        <div class="strip right" id="strip-menu" data-key="Escape"><span class="key">Esc</span><svg class="icon"><use href="#i-menu" /></svg></div>
+        <div class="strip right" id="strip-sound" data-key="KeyM"><span class="key">M</span><svg class="icon"><use id="sound-icon" href="#i-speaker" /></svg></div>
+      </div>
+    </div>
+
+    <!-- Start screen: only the title, a few keys and the button; the 3D boat is behind it. -->
+    <div id="start" class="show">
+      <header>
+        <p class="start-kicker">A small boat on a small planet</p>
+        <h1>Wake</h1>
+      </header>
+      <footer>
+        <p class="start-touch">Hold the arrows to steer and sail</p>
+        <ul class="start-keys">
+          <li><kbd>W</kbd><kbd>S</kbd><span>Throttle</span></li>
+          <li><kbd>A</kbd><kbd>D</kbd><span>Steer</span></li>
+          <li><kbd class="wide">Space</kbd><span>Anchor</span></li>
+          <li><kbd>H</kbd><span>Horn</span></li>
+          <li><kbd class="wide">Esc</kbd><span>All controls</span></li>
+        </ul>
+        <button id="start-action" class="big-button" type="button">Set sail</button>
+        <p class="start-foot">Sound on, please</p>
+      </footer>
+    </div>
+
+    <!-- Pause screen: every control, and the volumes. -->
+    <div id="menu">
+      <div class="menu-card">
+        <header>
+          <h1>Wake</h1>
+          <p class="menu-state">Paused</p>
+        </header>
+
+        <p class="touch-help">Left thumb: steer. Right thumb: forward and back, and the gauge button for boost. Lamp, anchor and horn are the diamonds at the top left. Drag the sea to look round the boat, pinch to zoom, and the top-right buttons pause and mute.</p>
+
+        <div class="menu-columns">
+          <section>
+            <h2>At the helm</h2>
+            <dl>
+              <div><dt><kbd>W</kbd><kbd>S</kbd></dt><dd>Throttle / reverse</dd></div>
+              <div><dt><kbd>A</kbd><kbd>D</kbd></dt><dd>Steer (you need speed)</dd></div>
+              <div><dt><kbd class="wide">Space</kbd></dt><dd>Drop / raise the anchor</dd></div>
+              <div><dt><kbd class="wide">Shift</kbd></dt><dd>Boost (8 knots)</dd></div>
+              <div><dt><kbd>H</kbd></dt><dd>Horn (hold it)</dd></div>
+              <div><dt><kbd>L</kbd></dt><dd>Bow lamp</dd></div>
+              <div><dt><kbd>C</kbd></dt><dd>Chase camera / planet view</dd></div>
+            </dl>
+          </section>
+          <section>
+            <h2>Sea and sky</h2>
+            <dl>
+              <div><dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></dt><dd>Calm / breezy / storm</dd></div>
+              <div><dt><kbd>4</kbd></dt><dd>Weather on its own</dd></div>
+              <div><dt><kbd>T</kbd></dt><dd>Hold to speed up time</dd></div>
+              <div><dt><kbd>M</kbd></dt><dd>Mute sound</dd></div>
+              <div><dt><kbd class="wide">Esc</kbd></dt><dd>Pause / resume</dd></div>
+            </dl>
+          </section>
+        </div>
+
+        <div class="menu-audio">
+          <label>Music <input id="volume-music" type="range" min="0" max="1" step="0.05" /></label>
+          <label>Effects <input id="volume-sfx" type="range" min="0" max="1" step="0.05" /></label>
+        </div>
+
+        <button id="menu-action" class="big-button" type="button">Resume</button>
+        <p class="menu-foot">Drag looks round the boat (it swings back by itself) &middot; Wheel zooms &middot; Enter also works</p>
+      </div>
+    </div>
+
+    <!-- Sound switch, shown on the start and pause screens (in the game the M strip on the right does it). -->
+    <button id="sound-button" type="button" aria-label="Sound on or off">
+      <svg class="icon"><use id="sound-button-icon" href="#i-speaker" /></svg>
+      <span id="sound-button-label">Sound on</span>
+      <span class="key">M</span>
+    </button>
+
+    <div id="loading">
+      <h1>Wake</h1>
+      <div id="loading-bar"><i id="loading-fill"></i></div>
+      <p id="loading-label">Starting up</p>
+    </div>
+    <div id="error" hidden>
+      <h1>WebGPU is not available</h1>
+      <p>This project needs a browser with WebGPU (recent Chrome, Edge or Safari&nbsp;26).</p>
+      <p id="error-detail"></p>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

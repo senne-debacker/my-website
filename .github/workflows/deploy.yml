@@ -58,6 +58,9 @@ jobs:
       - name: Build Fisherman (unlisted page at /fisherman)
         run: npm run build:fisherman
         working-directory: ${{ env.BUILD_PATH }}
+      - name: Build Wake (unlisted page at /wake)
+        run: npm run build:wake
+        working-directory: ${{ env.BUILD_PATH }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
