@@ -1,7 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import Layout from "../layouts/Layout.astro";
-import { projects, pad } from "../data/projects";
+import { projects, projectHref, pad } from "../data/projects";
 
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
@@ -20,7 +20,13 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
         {
           projects.map((p, i) => (
             <li class="slide" data-reveal style={`--delay:${i * 0.08}s; --p-accent:${p.accent}`}>
-              <a href={`${baseUrl}/work/${p.id}`} class="card" data-cursor="View" draggable="false">
+              <a
+                href={projectHref(p, baseUrl)}
+                data-astro-reload={p.href ? true : undefined}
+                class="card"
+                data-cursor="View"
+                draggable="false"
+              >
                 <div class="media">
                   <Image
                     src={p.image}

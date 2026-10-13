@@ -1,6 +1,6 @@
 ---
 import { Image } from "astro:assets";
-import { projects, pad } from "../data/projects";
+import { projects, projectHref, pad } from "../data/projects";
 
 interface Props {
   heading?: string;
@@ -20,7 +20,8 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
       projects.map((p, i) => (
         <li data-reveal style={`--delay:${i * 0.06}s`}>
           <a
-            href={`${baseUrl}/work/${p.id}`}
+            href={projectHref(p, baseUrl)}
+            data-astro-reload={p.href ? true : undefined}
             class="row"
             data-cursor="View"
             data-index-item={i}

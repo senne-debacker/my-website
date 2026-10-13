@@ -8,6 +8,8 @@ import wake from "../assets/wake-hero.jpg";
 export interface Project {
   /** Used in the URL: /work/{id} */
   id: string;
+  /** For projects that live on a page outside Astro (like /wake/): links go there instead of /work/{id}. */
+  href?: string;
   title: string;
   tagline: string;
   type: string;
@@ -26,11 +28,9 @@ export interface Project {
   body: string[];
 }
 
-/** The project highlighted on the home page. It lives outside `projects`, so it has no case-study page of its own. */
-export interface Featured extends Omit<Project, "figma" | "video" | "repo" | "body"> {
-  /** Path of the page it links to (an unlisted page outside Astro, so it is opened with a full page load). */
-  href: string;
-  summary: string[];
+/** What the home page shows on top of the project itself. */
+export interface Featured {
+  project: Project;
   /** Extra rows shown under Type / Role / Context. */
   notes: { label: string; value: string }[];
   cta: string;
@@ -114,25 +114,31 @@ export const projects: Project[] = [
       "Because it uses the accelerometer and other native features, Tiltionary only runs on a phone, so there is no playable version on this website. The video shows a full game on two devices.",
     ],
   },
+  {
+    id: "wake",
+    href: "/wake/",
+    title: "Wake",
+    tagline: "A tiny ocean planet you can sail around, in the browser.",
+    type: "Interactive 3D experience",
+    role: "Creative development",
+    context: "Expert Creative Development, Howest",
+    tags: ["WebGPU", "Three.js", "TSL shaders"],
+    image: wake,
+    accent: "#e8a36a",
+    body: [
+      "Wake is a small game-like toy: a low-poly water planet with a fishing boat you steer yourself. The sea is drawn on the GPU with a Shadertoy noise shader ported to TSL, and the boat floats on exactly the same waves. It has a day and night cycle, storms with rain and lightning, a lighthouse, islands and a foam wake that follows your path.",
+      "Best in a recent Chrome or Edge, since it needs WebGPU.",
+    ],
+  },
 ];
 
 export const featured: Featured = {
-  id: "wake",
-  title: "Wake",
-  tagline: "A tiny ocean planet you can sail around, in the browser.",
-  type: "Interactive 3D experience",
-  role: "Creative development",
-  context: "Expert Creative Development, Howest",
-  tags: ["WebGPU", "Three.js", "TSL shaders"],
-  image: wake,
-  accent: "#e8a36a",
-  href: "/wake/",
-  cta: "Sail it",
-  summary: [
-    "Wake is a small game-like toy: a low-poly water planet with a fishing boat you steer yourself. The sea is drawn on the GPU with a Shadertoy noise shader ported to TSL, and the boat floats on exactly the same waves. It has a day and night cycle, storms with rain and lightning, a lighthouse, islands and a foam wake that follows your path.",
-    "Best in a recent Chrome or Edge, since it needs WebGPU.",
-  ],
+  project: projects.find((p) => p.id === "wake")!,
   notes: [{ label: "Mobile", value: "Touch controls, work in progress" }],
+  cta: "Sail it",
 };
+
+/** Link to a project: its own page when it has one, otherwise the case study. */
+export const projectHref = (p: Project, baseUrl: string) => `${baseUrl}${p.href ?? `/work/${p.id}`}`;
 
 export const pad = (n: number) => String(n).padStart(2, "0");

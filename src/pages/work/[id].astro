@@ -2,13 +2,13 @@
 import type { GetStaticPaths } from "astro";
 import { Image } from "astro:assets";
 import Layout from "../../layouts/Layout.astro";
-import { projects, pad, type Project } from "../../data/projects";
+import { projects, projectHref, pad, type Project } from "../../data/projects";
 
+// Projects with their own page (like Wake) get no case study here.
 export const getStaticPaths = (() =>
-  projects.map((project, i) => ({
-    params: { id: project.id },
-    props: { project, index: i },
-  }))) satisfies GetStaticPaths;
+  projects.flatMap((project, i) =>
+    project.href ? [] : [{ params: { id: project.id }, props: { project, index: i } }],
+  )) satisfies GetStaticPaths;
 
 interface Props {
   project: Project;
@@ -16,7 +16,8 @@ interface Props {
 }
 
 const { project: p, index } = Astro.props;
-const next = projects[(index + 1) % projects.length];
+const caseStudies = projects.filter((project) => !project.href);
+const next = caseStudies[(caseStudies.indexOf(p) + 1) % caseStudies.length];
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 const figmaUrl = p.figma?.replace("embed.figma.com", "www.figma.com").replace(/&?embed-host=share/, "");
 const videoSrc = p.video ? `${baseUrl}${p.video.src}` : undefined;
@@ -123,7 +124,7 @@ const videoSrc = p.video ? `${baseUrl}${p.video.src}` : undefined;
       )
     }
 
-    <a href={`${baseUrl}/work/${next.id}`} class="next wrap" data-cursor="Next" style={`--n-accent:${next.accent}`}>
+    <a href={projectHref(next, baseUrl)} class="next wrap" data-cursor="Next" style={`--n-accent:${next.accent}`}>
       <span class="label muted">Next project</span>
       <span class="next-title">
         {next.title}

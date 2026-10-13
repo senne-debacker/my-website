@@ -1,12 +1,13 @@
 ---
 import { Image } from "astro:assets";
-import { featured, projects, pad } from "../data/projects";
+import { featured, projects, projectHref, pad } from "../data/projects";
 
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
-const p = featured;
-const number = pad(projects.length + 1);
-// The page lives outside Astro, so the client router must not try to swap it in.
-const href = `${baseUrl}${p.href}`;
+const { project: p, notes, cta } = featured;
+const number = pad(projects.indexOf(p) + 1);
+const href = projectHref(p, baseUrl);
+// A page outside Astro must be opened with a full page load, not by the client router.
+const reload = p.href ? { "data-astro-reload": true } : {};
 ---
 
 <section class="featured wrap" style={`--p-accent: ${p.accent}`} aria-labelledby="featured-title">
@@ -26,7 +27,7 @@ const href = `${baseUrl}${p.href}`;
       <h2 id="featured-title" class="title" data-reveal>{p.title}</h2>
       <p class="tagline" data-reveal style="--delay: 0.1s">{p.tagline}</p>
       <div class="summary" data-reveal style="--delay: 0.12s">
-        {p.summary.map((para) => <p>{para}</p>)}
+        {p.body.map((para) => <p>{para}</p>)}
       </div>
 
       <dl class="meta">
@@ -43,7 +44,7 @@ const href = `${baseUrl}${p.href}`;
           <dd class="label">{p.context}</dd>
         </div>
         {
-          p.notes.map((n, i) => (
+          notes.map((n, i) => (
             <div class="row rule" data-reveal style={`--delay: ${0.3 + i * 0.05}s`}>
               <dt class="label muted">{n.label}</dt>
               <dd class="label">{n.value}</dd>
@@ -52,15 +53,15 @@ const href = `${baseUrl}${p.href}`;
         }
       </dl>
 
-      <a href={href} class="pill pill--solid cta" data-magnetic="0.25" data-astro-reload>
-        {p.cta} <span class="arrow">→</span>
+      <a href={href} class="pill pill--solid cta" data-magnetic="0.25" {...reload}>
+        {cta} <span class="arrow">→</span>
       </a>
     </div>
 
     <div class="media-wrap" data-parallax="0.05">
     <a
       href={href}
-      data-astro-reload
+      {...reload}
       class="media"
       data-cursor="Play"
       aria-label={`Open ${p.title}`}
