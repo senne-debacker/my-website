@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# separate React Native project (only its demo video is used on the site)
+TiltTekenen/

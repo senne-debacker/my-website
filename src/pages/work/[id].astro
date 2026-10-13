@@ -18,7 +18,8 @@ interface Props {
 const { project: p, index } = Astro.props;
 const next = projects[(index + 1) % projects.length];
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
-const figmaUrl = p.figma.replace("embed.figma.com", "www.figma.com").replace(/&?embed-host=share/, "");
+const figmaUrl = p.figma?.replace("embed.figma.com", "www.figma.com").replace(/&?embed-host=share/, "");
+const videoSrc = p.video ? `${baseUrl}${p.video.src}` : undefined;
 ---
 
 <Layout title={p.title} description={p.tagline}>
@@ -81,22 +82,46 @@ const figmaUrl = p.figma.replace("embed.figma.com", "www.figma.com").replace(/&?
       </div>
     </div>
 
-    <section class="proto wrap" aria-labelledby="proto-title">
-      <div class="proto-head rule">
-        <h2 id="proto-title" class="label">Interactive prototype</h2>
-        <a href={figmaUrl} target="_blank" rel="noopener noreferrer" class="label muted open">
-          Open in Figma ↗
-        </a>
-      </div>
+    {
+      p.figma && (
+        <section class="proto wrap" aria-labelledby="proto-title">
+          <div class="proto-head rule">
+            <h2 id="proto-title" class="label">Interactive prototype</h2>
+            <a href={figmaUrl} target="_blank" rel="noopener noreferrer" class="label muted open">
+              Open in Figma ↗
+            </a>
+          </div>
 
-      <div class="proto-frame" data-proto={p.figma} data-title={`${p.title} Figma prototype`}>
-        <Image src={p.image} alt="" widths={[800, 1400]} sizes="100vw" class="proto-poster" />
-        <button type="button" class="proto-play" data-cursor="Play" data-magnetic="0.2">
-          <span class="play-icon" aria-hidden="true">▶</span>
-          <span>Launch prototype</span>
-        </button>
-      </div>
-    </section>
+          <div class="proto-frame" data-proto={p.figma} data-title={`${p.title} Figma prototype`}>
+            <Image src={p.image} alt="" widths={[800, 1400]} sizes="100vw" class="proto-poster" />
+            <button type="button" class="proto-play" data-cursor="Play" data-magnetic="0.2">
+              <span class="play-icon" aria-hidden="true">▶</span>
+              <span>Launch prototype</span>
+            </button>
+          </div>
+        </section>
+      )
+    }
+
+    {
+      p.video && (
+        <section class="proto wrap" aria-labelledby="video-title">
+          <div class="proto-head rule">
+            <h2 id="video-title" class="label">
+              Demo video
+            </h2>
+            {p.repo && (
+              <a href={p.repo} target="_blank" rel="noopener noreferrer" class="label muted open">
+                View code ↗
+              </a>
+            )}
+          </div>
+
+          <video class="demo" src={`${videoSrc}#t=3`} controls playsinline preload="metadata" />
+          <p class="label muted caption">{p.video.caption}</p>
+        </section>
+      )
+    }
 
     <a href={`${baseUrl}/work/${next.id}`} class="next wrap" data-cursor="Next" style={`--n-accent:${next.accent}`}>
       <span class="label muted">Next project</span>
@@ -324,6 +349,17 @@ const figmaUrl = p.figma.replace("embed.figma.com", "www.figma.com").replace(/&?
 
   .proto-frame.is-live .proto-play {
     display: none;
+  }
+
+  .demo {
+    display: block;
+    width: min(100%, 44rem);
+    aspect-ratio: 1 / 1;
+    background: var(--surface);
+  }
+
+  .caption {
+    margin-top: 0.9rem;
   }
 
   .next {

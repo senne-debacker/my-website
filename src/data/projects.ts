@@ -2,6 +2,7 @@ import type { ImageMetadata } from "astro";
 import thrive from "../assets/thrive-hero.png";
 import lumen from "../assets/lumen-hero.png";
 import type01 from "../assets/type01-hero.png";
+import tiltionary from "../assets/tiltionary-hero.jpg";
 import wake from "../assets/wake-hero.jpg";
 
 export interface Project {
@@ -16,12 +17,17 @@ export interface Project {
   image: ImageMetadata;
   /** Per-project accent colour used on hover states and the detail page. */
   accent: string;
-  figma: string;
+  /** Figma prototype to embed. Projects without one can show a demo video instead. */
+  figma?: string;
+  /** Demo video (a path in /public) for projects that cannot run in the browser. */
+  video?: { src: string; caption: string };
+  /** Source code, shown as a link next to the demo. */
+  repo?: string;
   body: string[];
 }
 
 /** The project highlighted on the home page. It lives outside `projects`, so it has no case-study page of its own. */
-export interface Featured extends Omit<Project, "figma" | "body"> {
+export interface Featured extends Omit<Project, "figma" | "video" | "repo" | "body"> {
   /** Path of the page it links to (an unlisted page outside Astro, so it is opened with a full page load). */
   href: string;
   summary: string[];
@@ -84,6 +90,28 @@ export const projects: Project[] = [
     body: [
       "TYPE01 is a typography magazine, and every year they organize a conference about typography. For this project, I had to create a modern website for the conference that is consistent with the magazine's identity and core values. The website also had to be responsive for both desktop and mobile.",
       "I got inspiration from Swiss Style design and grid systems, using elementary objects and colors. The result is a modern looking website with a retro feeling, which appeals to all audiences.",
+    ],
+  },
+  {
+    id: "4",
+    title: "Tiltionary",
+    tagline: "A multiplayer drawing game where you draw by tilting your phone.",
+    type: "Mobile app",
+    role: "Concept, UX/UI, development",
+    context: "React Native, Howest",
+    tags: ["React Native", "Realtime", "Multiplayer"],
+    image: tiltionary,
+    accent: "#4285f4",
+    repo: "https://github.com/senne-debacker/Tiltionary",
+    video: {
+      src: "/videos/tiltionary-demo.mp4",
+      caption: "Demo: an Android phone and an iPhone playing a round together.",
+    },
+    body: [
+      "Tiltionary is a multiplayer drawing and guessing game for your phone, where you draw by tilting it. You drop a ball on the canvas and roll it around to draw the word you were given, while the other players guess in the chat. The faster you guess, the more points you score.",
+      "The app is built with Expo and React Native, with Expo Router for navigation, Zustand for state and the Firebase Realtime Database to keep every phone in sync. One hook listens to the room and writes everything into a store, so screens never talk to Firebase directly. The host's phone moves the game from phase to phase, and the drawing streams to all players live.",
+      "Besides the game there is a sandbox to practise the controls, and you can save or share your drawing as a photo or as an animated GIF that replays how you drew it. The look follows a styleboard based on Google's developer event branding: four brand colours, flat shapes with thin outlines, and light and dark mode on every screen.",
+      "Because it uses the accelerometer and other native features, Tiltionary only runs on a phone, so there is no playable version on this website. The video shows a full game on two devices.",
     ],
   },
 ];
