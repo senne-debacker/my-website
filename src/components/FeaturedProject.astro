@@ -4,8 +4,9 @@ import { featured, projects, pad } from "../data/projects";
 
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 const p = featured;
-const number = pad(projects.indexOf(p) + 1);
-const href = `${baseUrl}/work/${p.id}`;
+const number = pad(projects.length + 1);
+// The page lives outside Astro, so the client router must not try to swap it in.
+const href = `${baseUrl}${p.href}`;
 ---
 
 <section class="featured wrap" style={`--p-accent: ${p.accent}`} aria-labelledby="featured-title">
@@ -24,6 +25,9 @@ const href = `${baseUrl}/work/${p.id}`;
 
       <h2 id="featured-title" class="title" data-reveal>{p.title}</h2>
       <p class="tagline" data-reveal style="--delay: 0.1s">{p.tagline}</p>
+      <div class="summary" data-reveal style="--delay: 0.12s">
+        {p.summary.map((para) => <p>{para}</p>)}
+      </div>
 
       <dl class="meta">
         <div class="row rule" data-reveal style="--delay: 0.15s">
@@ -38,19 +42,28 @@ const href = `${baseUrl}/work/${p.id}`;
           <dt class="label muted">Context</dt>
           <dd class="label">{p.context}</dd>
         </div>
+        {
+          p.notes.map((n, i) => (
+            <div class="row rule" data-reveal style={`--delay: ${0.3 + i * 0.05}s`}>
+              <dt class="label muted">{n.label}</dt>
+              <dd class="label">{n.value}</dd>
+            </div>
+          ))
+        }
       </dl>
 
-      <a href={href} class="pill pill--solid cta" data-magnetic="0.25">
-        View project <span class="arrow">→</span>
+      <a href={href} class="pill pill--solid cta" data-magnetic="0.25" data-astro-reload>
+        {p.cta} <span class="arrow">→</span>
       </a>
     </div>
 
     <div class="media-wrap" data-parallax="0.05">
     <a
       href={href}
+      data-astro-reload
       class="media"
-      data-cursor="View"
-      aria-label={`View ${p.title} project`}
+      data-cursor="Play"
+      aria-label={`Open ${p.title}`}
       style={`aspect-ratio: ${p.image.width} / ${p.image.height}`}
       data-reveal
     >
@@ -134,6 +147,18 @@ const href = `${baseUrl}/work/${p.id}`;
     font-size: clamp(1rem, 1.4vw, 1.25rem);
     color: var(--muted);
     line-height: 1.35;
+  }
+
+  .summary {
+    max-width: 42ch;
+    margin-top: 1.25rem;
+    font-size: 0.9375rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .summary p + p {
+    margin-top: 0.75em;
   }
 
   .meta {

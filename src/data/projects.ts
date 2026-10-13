@@ -2,6 +2,7 @@ import type { ImageMetadata } from "astro";
 import thrive from "../assets/thrive-hero.png";
 import lumen from "../assets/lumen-hero.png";
 import type01 from "../assets/type01-hero.png";
+import wake from "../assets/wake-hero.jpg";
 
 export interface Project {
   /** Used in the URL: /work/{id} */
@@ -17,8 +18,16 @@ export interface Project {
   accent: string;
   figma: string;
   body: string[];
-  /** The featured project is highlighted on the home page. */
-  featured?: boolean;
+}
+
+/** The project highlighted on the home page. It lives outside `projects`, so it has no case-study page of its own. */
+export interface Featured extends Omit<Project, "figma" | "body"> {
+  /** Path of the page it links to (an unlisted page outside Astro, so it is opened with a full page load). */
+  href: string;
+  summary: string[];
+  /** Extra rows shown under Type / Role / Context. */
+  notes: { label: string; value: string }[];
+  cta: string;
 }
 
 export const projects: Project[] = [
@@ -34,7 +43,6 @@ export const projects: Project[] = [
     accent: "#3fc6cf",
     figma:
       "https://embed.figma.com/proto/M9lBQCMS2c1mXZyvizic27/FINAL?page-id=201%3A17943&node-id=201-17990&viewport=159%2C225%2C0.09&scaling=scale-down&content-scaling=fixed&embed-host=share",
-    featured: true,
     body: [
       "For this project, we had to create a complete campaign for a sports beer brand, and design a website for that campaign. The design had to stay consistent with the brand's identity and core values.",
       "After research and brainstorming, I came up with a campaign involving cycling and electricity. When you cycle, you can measure your energy output in Watts, and these Watts can (in theory) be used to brew Thrive beer. I calculated it would take the average person about 39km of cycling to produce enough energy for one can of Thrive beer.",
@@ -80,6 +88,23 @@ export const projects: Project[] = [
   },
 ];
 
-export const featured = projects.find((p) => p.featured) ?? projects[0];
+export const featured: Featured = {
+  id: "wake",
+  title: "Wake",
+  tagline: "A tiny ocean planet you can sail around, in the browser.",
+  type: "Interactive 3D experience",
+  role: "Creative development",
+  context: "Expert Creative Development, Howest",
+  tags: ["WebGPU", "Three.js", "TSL shaders"],
+  image: wake,
+  accent: "#e8a36a",
+  href: "/wake/",
+  cta: "Sail it",
+  summary: [
+    "Wake is a small game-like toy: a low-poly water planet with a fishing boat you steer yourself. The sea is drawn on the GPU with a Shadertoy noise shader ported to TSL, and the boat floats on exactly the same waves. It has a day and night cycle, storms with rain and lightning, a lighthouse, islands and a foam wake that follows your path.",
+    "Best in a recent Chrome or Edge, since it needs WebGPU.",
+  ],
+  notes: [{ label: "Mobile", value: "Touch controls, work in progress" }],
+};
 
 export const pad = (n: number) => String(n).padStart(2, "0");
