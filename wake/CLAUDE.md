@@ -24,6 +24,7 @@ src/
   interaction.js       keyboard -> `input` {throttle, steer, anchored, planetView} + weather uniform
   hud.js               the in-game interface: day ring + anchor marker, pill, compass, diamond tools, stat box, strips, toasts
   touch.js             touch mode switch (body.touch): on-screen pads on phones, hidden on desktop
+  tilt.js              tilt steering on phones (phone as a steering wheel), the Joystick / Tilt switch (.ctrl-mode)
   menu.js              start screen (#start: title, 5 keys, button) and pause screen (#menu: all controls, volumes)
   audio/               audio.js (Web Audio graph: engine/sea/wash/rain layers + one-shots), music.js (generative)
   camera/              chaseCamera.js (follows the sphere frame, ignores wave tilt), introCamera.js (title close-up + swing to the chase pose), cameraRig.js (title/pan -> chase <-> planet orbit)
@@ -330,6 +331,12 @@ User asked for: effects in planet view (rain, ripples, fog, fishing particles), 
 - [x] **Flag** (`scene/flag.js`, `world/wind.js`, `WIND` / `FLAG` in `config.js`): finds the mesh named `Flag...` (or with a material of that name) in the built-in boat and in `public/models/boat.glb` (there the flag is a six-vertex pennant, mesh `Plane`, material `Flag`). It cuts the flag into many triangles (`TessellateModifier`, `FLAG.cuts`), moves it into a pivot at the end on the mast (the end with the taller edge), and gives its material a TSL `positionNode`: a wave runs from the mast to the tip (plus a faster one and a small lift), growing as `u^1.4`, amplitude and speed from the wind strength (the wave phase is accumulated in JS so a gust does not make it jump). The wind (`wind.js`): a bearing wandering round `WIND.baseBearing` and a strength = calm 0.3 + storm, with gusts. main.js passes `{ angle: wind.bearing - compass heading, strength }` to `boat.update`; the pivot turns so that the flag streams downwind and swings round when the boat turns (eased by `FLAG.turnRate`). Checked: 2178 vertices on the model's flag, folds visible in zoomed crops, the pivot yaw changes 2.9 -> 6.2 rad while turning. Assumes the flag lies in a vertical plane, longer than tall, with no transforms on the nodes above it
 - Not done / ideas: the clouds and rain do not follow the wind direction; no wind indicator in the HUD
 
+### Step 31 — Tilt steering on phones  *(done)*
+- [x] `src/tilt.js` + `TILT` in `config.js`: a **Steering: Joystick | Tilt** switch (`.ctrl-mode` on the start screen and in the pause screen, touch mode only; saved in `localStorage` `wake.controls`). With Tilt the phone is a steering wheel (clockwise = starboard): the roll comes from the direction of gravity seen from the screen (`screenRoll`: `deviceorientation` beta/gamma + `screen.orientation.angle`, so portrait, both landscapes, iOS and Android behave the same; `devicemotion` is avoided because its sign differs per platform), dead zone 4 degrees, full helm at 30, smoothed. The neutral angle is the pose when the game starts / resumes (`setState` calls `tilt.calibrate()`), so the player holds the phone as they like. The joystick keeps the throttle; with tilt active its knob only slides up / down (`touch.js`) and its left / right chevrons light up with the helm (`--steer`). `interaction.tilt` = `{ active, value }` replaces the helm of keys and stick in `interaction.update`
+- [x] Permission: iOS needs `DeviceOrientationEvent.requestPermission()` inside a tap: done when tilt is selected and again in `tilt.begin()` on "Set sail" / "Resume" (a saved choice of tilt needs it again in a new session). No sensor, denied, or no reading within 1.2 s -> back to the joystick, the reason under the switch and as a toast
+- [x] `tests/tilt.check.mjs` (17 checks, in `npm run check`): the same wheel angle gives the same roll in portrait and both landscapes, direction of the helm, dead zone, full helm, wrap-around, flat phone ignored. Checked in headless Chrome (mobile emulation, synthetic `DeviceOrientationEvent`s): switch on both screens, tilt on -> helm +0.81 at +25 degrees, -0.80 at -25, 0 inside the dead zone, 1 at 60; the neutral moves when resuming at another angle; back to the joystick; saved choice with no sensor falls back with the message
+- NOT checked: a real phone (the sensor signs follow the W3C spec and the maths is verified against it, but not against hardware), iOS permission dialog. The pause screen's switch sits below the touch map, so on a short landscape phone the card scrolls to reach it
+
 ## Final requirements check (re-run before handing in)
 
 ```
@@ -348,6 +355,7 @@ npm run check                                                                   
 
 ## Progress log
 
+- 2026-10-18: Step 31: tilt steering on phones with a Joystick / Tilt switch.
 - 2026-10-19: Step 30: hint only within anchor distance, thinner fog when zoomed out, wind + fluttering flag.
 - 2026-10-18: Step 29: planet-view rain / ripples / fog / bubbles, developer mode (`?dev`, code 1815; weather keys and T locked otherwise), keyboard-drawn pause screen, joystick + diamond buttons on phones (portrait and landscape).
 - 2026-10-14: Step 28: fishing. 6 bubbling spots (foam patch + instanced bubbles), anchor over one opens the hold-and-release minigame, 16-fish database, logbook (B), game states `fishing` / `logbook`, 63 new checks.

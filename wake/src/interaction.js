@@ -22,7 +22,7 @@ const RIGHT = ['KeyD', 'ArrowRight']
 export function setupInteraction(handlers = {}) {
   const down = new Set()
   const input = { throttle: 0, steer: 0, anchored: false, lights: false, horn: false, planetView: false, fastForward: false, boost: false, weather: 'auto' }
-  const interaction = { input, enabled: true, dev: false, stick: { active: false, x: 0, y: 0 } } // stick: the touch joystick (touch.js) // dev: the weather keys and T work (set by devMode.js after the code was entered)
+  const interaction = { input, enabled: true, dev: false, stick: { active: false, x: 0, y: 0 }, tilt: { active: false, value: 0 } } // stick: the touch joystick (touch.js); tilt: steering by turning the phone (tilt.js), replaces the helm of keys and stick when active // dev: the weather keys and T work (set by devMode.js after the code was entered)
 
   // Which key was pressed? A letter key is identified by the letter printed on it
   // (event.key), so M is M on every keyboard layout; on an AZERTY keyboard the key labelled M is
@@ -87,7 +87,8 @@ export function setupInteraction(handlers = {}) {
     input.throttle = analog ? interaction.stick.y : axis(FORWARD, BACK)
     input.fastForward = interaction.dev && down.has('KeyT')
     input.boost = down.has('ShiftLeft') || down.has('ShiftRight')
-    input.steer += ((analog ? interaction.stick.x : axis(RIGHT, LEFT)) - input.steer) * (1 - Math.exp(-delta * 8))
+    const helm = interaction.enabled && interaction.tilt.active ? interaction.tilt.value : analog ? interaction.stick.x : axis(RIGHT, LEFT)
+    input.steer += (helm - input.steer) * (1 - Math.exp(-delta * 8))
   }
 
   return interaction

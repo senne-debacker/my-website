@@ -43,7 +43,7 @@ export function setupStick(interaction) {
     base.style.setProperty('--dy', '0px')
   }
   const move = (event) => {
-    let dx = event.clientX - cx
+    let dx = interaction.tilt.active ? 0 : event.clientX - cx // with tilt steering the knob only slides up and down
     let dy = event.clientY - cy
     const length = Math.hypot(dx, dy)
     if (length > reach) {

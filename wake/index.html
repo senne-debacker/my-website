@@ -111,7 +111,14 @@
         <h1>Wake</h1>
       </header>
       <footer>
-        <p class="start-touch">Drag the stick to steer and sail</p>
+        <p class="start-touch" data-stick-hint>Drag the stick to steer and sail</p>
+        <div class="ctrl-mode" role="group" aria-label="Steering on a touch screen">
+          <span class="ctrl-label">Steering</span>
+          <button type="button" data-mode="stick" aria-pressed="true">Joystick</button>
+          <button type="button" data-mode="tilt" aria-pressed="false">Tilt</button>
+          <p class="ctrl-note" aria-live="polite"></p>
+        </div>
+
         <ul class="start-keys">
           <li><kbd>W</kbd><kbd>S</kbd><span>Throttle</span></li>
           <li><kbd>A</kbd><kbd>D</kbd><span>Steer</span></li>
@@ -171,7 +178,7 @@
               <svg class="icon s-right"><use href="#i-right" /></svg>
               <i class="stick-knob"></i>
             </div>
-            <p>Drag to sail and steer</p>
+            <p data-stick-hint>Drag the stick to steer and sail</p>
           </div>
           <div class="tm-buttons">
             <div class="mini-tool"><div class="diamond"><svg class="icon"><use href="#i-eye" /></svg></div><span>Camera</span></div>
@@ -182,6 +189,13 @@
             <div class="mini-tool"><div class="diamond"><svg class="icon"><use href="#i-anchor" /></svg></div><span>Anchor</span></div>
           </div>
           <p class="tm-note">Anchor over bubbling water to fish. Drag the sea to look round, pinch to zoom. The top-right buttons pause and mute.</p>
+        </div>
+
+        <div class="ctrl-mode" role="group" aria-label="Steering on a touch screen">
+          <span class="ctrl-label">Steering</span>
+          <button type="button" data-mode="stick" aria-pressed="true">Joystick</button>
+          <button type="button" data-mode="tilt" aria-pressed="false">Tilt</button>
+          <p class="ctrl-note" aria-live="polite"></p>
         </div>
 
         <div class="menu-audio">

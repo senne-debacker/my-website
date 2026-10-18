@@ -463,6 +463,15 @@ export const FLAG = {
   turnRate: 4, // 1 / s, how quickly the flag swings round when the wind (or the boat's heading) changes
 }
 
+// --- Tilt steering (phones) -------------------------------------------------------
+// tilt.js: turn the phone like a steering wheel (in the plane of the screen). Angles in degrees.
+export const TILT = {
+  deadDeg: 4, // a small play round the neutral angle
+  fullDeg: 30, // full helm at this angle from the neutral one
+  minGravity: 0.3, // below this much of gravity in the screen plane (phone nearly flat) the angle is meaningless: helm 0
+  response: 14, // 1 / s, how quickly the helm follows the phone (smooths sensor noise)
+}
+
 // --- Fishing ---------------------------------------------------------------------
 // The hold-and-release fight (fishing/fishingMinigame.js). Progress and tension both run 0..1:
 // holding the reel fills progress slowly and tension quickly, letting go drains tension.
