@@ -13,14 +13,12 @@ import { uniforms } from '../uniforms.js'
 //   uniforms.fishingSpots  xyz = the spot's direction from the planet centre, w = how full of bubbles
 //                          it is (0 = empty, 1 = bubbling); the water's foam patch reads it too
 //   frame                  xyz = a tangent at the spot, w = the height of the water there
-//   visible                1 in the chase view, 0 in planet view (the foam patch marks the spots there)
 const hash = Fn(([x]) => fract(sin(x.mul(127.1)).mul(43758.5453)))
 
 export function createFishingBubbleMaterial(spotCount) {
   const { bubbles, radius, rise, size, speed } = FISHING.spots
   const blank = (x, y, z) => Array.from({ length: spotCount }, () => new Vector4(x, y, z, 0))
   const frame = uniformArray(blank(1, 0, 0), 'vec4')
-  const visible = uniform(1)
 
   const material = new MeshBasicNodeMaterial({ transparent: true, depthWrite: false })
 
@@ -34,7 +32,7 @@ export function createFishingBubbleMaterial(spotCount) {
   const up = spot.xyz
   const tangent = side.xyz
   const bitangent = cross(up, tangent)
-  const fullness = spot.w.mul(visible)
+  const fullness = spot.w
 
   // 0 -> 1 over the life of a bubble; each one runs at its own speed and starts at its own moment.
   const life = fract(uniforms.time.mul(speed).mul(r3.mul(0.6).add(0.7)).add(r4))
@@ -62,5 +60,5 @@ export function createFishingBubbleMaterial(spotCount) {
   material.colorNode = color(new Color(FISHING.spots.color)).mul(facet).mul(float(1).sub(night.mul(0.45)))
   material.opacityNode = float(FISHING.spots.opacity)
 
-  return { material, frame, visible }
+  return { material, frame }
 }

@@ -2,7 +2,7 @@ import {
   WebGPURenderer, Scene, PerspectiveCamera, Color, Vector3, ACESFilmicToneMapping,
 } from 'three/webgpu'
 
-import { PALETTE, INTRO, BOAT, FISHING } from './config.js'
+import { PALETTE, INTRO, BOAT, FISHING, CAMERA } from './config.js'
 import { uniforms } from './uniforms.js'
 import { createPlanet } from './scene/planet.js'
 import { createFish } from './scene/fish.js'
@@ -14,8 +14,9 @@ import { createRain } from './scene/rain.js'
 import { createClock } from './world/clock.js'
 import { createAtmosphere } from './world/atmosphere.js'
 import { createWeather } from './world/weather.js'
+import { createWind } from './world/wind.js'
 import { QUALITY } from './quality.js'
-import { setupTouchMode, isTouch } from './touch.js'
+import { setupTouchMode, setupStick, isTouch } from './touch.js'
 import { createDolphins } from './scene/dolphin.js'
 import { createLightning } from './world/lightning.js'
 import { createWake } from './world/wake.js'
@@ -32,11 +33,15 @@ import { resolveCollisions } from './physics/collision.js'
 import { createCameraRig } from './camera/cameraRig.js'
 import { createHud, compassHeading } from './hud.js'
 import { createMenu } from './menu.js'
+import { createDevMode } from './devMode.js'
 import { createCursorHider } from './cursor.js'
 import { createLoader } from './loader.js'
 import { createAudio } from './audio/audio.js'
 import { createPostProcessing } from './post.js'
 import { setupInteraction } from './interaction.js'
+
+const FOG_ZOOM = 0.5 // how much the haze thins out when zooming out: 1 = in proportion to the distance (clear), 0 = not at all
+const CHASE_DISTANCE = Math.hypot(CAMERA.distance, CAMERA.height) // about how far the camera is from the boat at the normal zoom
 
 async function main() {
   // The assignment requires WebGPU. WebGPURenderer would silently fall back to
@@ -81,6 +86,7 @@ async function main() {
 
   const clock = createClock()
   const weather = createWeather()
+  const wind = createWind()
   const wake = createWake()
   const atmosphere = createAtmosphere({ scene, sun, moon, fill })
   const lightning = createLightning({ onStrike: (delay, brightness) => audio.thunder(delay, brightness) })
@@ -171,6 +177,8 @@ async function main() {
     },
     onResume: () => setState('playing'),
   })
+  setupStick(interaction) // the touch joystick
+  const dev = createDevMode({ interaction, clock, spots, logbook, startFishing, getState: () => state }) // ?dev + code: weather, time and fishing tools
   const cursor = createCursorHider()
   // The clickable HUD: every button triggers the same action as its key; buttons marked data-hold
   // (horn, hold-for-time) act while the mouse button is down.
@@ -256,7 +264,8 @@ async function main() {
     }
     placeBoat(elapsed, delta) // CPU twin of the waves (same clock and weather as the shader), then the hull's weight
     fish.update(delta, Math.min(1.6, boatState.vel.length() / BOAT.maxSpeed), input.anchored) // the schools of fish swim on the GPU
-    boat.update(delta, input.lights, input.horn, elapsed)
+    wind.update(elapsed, weather.levels.storm)
+    boat.update(delta, input.lights, input.horn, elapsed, { angle: wind.bearing - (compassHeading(boatState) * Math.PI) / 180, strength: wind.strength }) // the flag streams downwind
     // The lamp's pool of light on the water (tsl/lampPool.js) follows the boat over the curved surface.
     uniforms.lampDir.value.copy(boatState.dir)
     uniforms.lampForward.value.copy(boatState.heading).addScaledVector(boatState.dir, -boatState.heading.dot(boatState.dir)).normalize()
@@ -267,7 +276,7 @@ async function main() {
     spaceAmount += ((input.planetView ? 1 : 0) - spaceAmount) * (1 - Math.exp(-delta * 4))
     dolphins.update(delta, elapsed, boatState, weather.levels.storm, running, spaceAmount)
     lightning.update(delta, weather.levels, running)
-    atmosphere.update(clock.timeOfDay, boatState.dir, camera.position.length(), spaceAmount, weather.levels, lightning.flash) // lights, fog, sky and water colours
+    atmosphere.update(clock.timeOfDay, boatState.dir, camera.position.length(), spaceAmount, weather.levels, lightning.flash, Math.min(1, CHASE_DISTANCE / camera.position.distanceTo(boat.root.position)) ** FOG_ZOOM) // lights, fog (a bit thinner when zoomed out), sky and water colours
     sky.update(camera)
     clouds.update(delta, weather.levels.cover, spaceAmount)
 
@@ -281,6 +290,7 @@ async function main() {
       lastDay = clock.days
       spots.refill()
     }
+    dev.update()
     spots.update({ delta, time: elapsed, storm: uniforms.storm.value, space: spaceAmount })
 
     // Sounds and messages for things that just happened, and the continuous sounds.
@@ -297,7 +307,7 @@ async function main() {
 
       // Fishing: say so when a spot with fish comes within reach, and start the fight when the anchor
       // goes down on one.
-      const biting = input.anchored ? null : spots.nearest(boatState.dir, FISHING.spots.hintRadius)?.spot ?? null
+      const biting = input.anchored ? null : spots.nearest(boatState.dir, FISHING.spots.triggerRadius)?.spot ?? null
       if (biting && biting !== hintedSpot) hud.toast(isTouch() ? 'Fish are biting here: tap the anchor' : 'Fish are biting here: drop the anchor (Space)', 3.5)
       hintedSpot = biting
       if (input.anchored && !previous.anchored) {
@@ -335,6 +345,7 @@ async function main() {
     if (warmupFrames >= 0 && ++warmupFrames === 30) {
       warmupFrames = -1
       loader.finish()
+      dev.begin() // with ?dev in the address: asks for the code
     }
   })
 

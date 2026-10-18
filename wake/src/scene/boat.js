@@ -5,6 +5,7 @@ import {
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { BOAT, BOAT_PALETTE as C, BOAT_LIGHT as L } from '../config.js'
 import { createLightCone } from '../tsl/lightCone.js'
+import { setupFlag } from './flag.js'
 
 // Low-poly fishing boat: built in code, or your own model from public/models/boat.glb (see
 // `loadBoatModel` below and public/models/README.txt) when that file exists.
@@ -160,13 +161,14 @@ export function createBoat() {
 
   // What update() animates. For the built-in boat: the horn, the horn bell and the glowing
   // materials. For a loaded model the same roles are found by name (see loadBoatModel).
-  const parts = { horn: hornGroup, bell, glow: [{ material: lampGlass, strength: 0.4 }, { material: windows, strength: 0.45 }] }
+  const parts = { flag: setupFlag(look), horn: hornGroup, bell, glow: [{ material: lampGlass, strength: 0.4 }, { material: windows, strength: 0.45 }] }
 
   // Resolves when the model file (if there is one) has replaced the built-in boat.
   const ready = loadBoatModel().then((loaded) => {
     if (!loaded) return false
     model.remove(look)
     model.add(loaded.root)
+    parts.flag = loaded.flag
     parts.horn = loaded.horn
     parts.bell = loaded.bell
     parts.glow = loaded.glow
@@ -180,7 +182,9 @@ export function createBoat() {
     },
     model,
     ready,
-    update(delta, lightsOn, hornOn = false, time = 0) {
+    // `wind`: { angle, strength } of the wind relative to the bow (see scene/flag.js)
+    update(delta, lightsOn, hornOn = false, time = 0, wind = { angle: Math.PI, strength: 0.3 }) {
+      parts.flag?.update(delta, wind.angle, wind.strength)
       hornLevel += ((hornOn ? 1 : 0) - hornLevel) * (1 - Math.exp(-delta * 18))
       parts.bell?.scale.setScalar(1 + 0.1 * hornLevel * Math.sin(time * 75)) // the bell trembles while it sounds
       if (parts.horn) parts.horn.rotation.z = 0.025 * hornLevel * Math.sin(time * 61)
@@ -200,6 +204,7 @@ export function createBoat() {
 // Roles are found by name:
 //   a node whose name starts with "Horn"      trembles while the horn sounds (its child named
 //                                             "Bell..." grows and shrinks)
+//   a mesh named "Flag..." (or with a material of that name)  flutters and turns with the wind (scene/flag.js)
 //   materials named "Window..." and "Lamp..."  glow when the lamp is on (their emissive colour is
 //                                             used; without one the base colour / a warm white is)
 // Returns null when there is no file.
@@ -240,5 +245,5 @@ async function loadBoatModel() {
       glow.push({ material, strength: kind.startsWith('lamp') ? 0.4 : 0.45 })
     }
   })
-  return { root, horn, bell, glow }
+  return { root, horn, bell, glow, flag: setupFlag(root) }
 }

@@ -344,7 +344,8 @@ body {
   inset: 0;
   z-index: 20;
   display: none;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
   background: radial-gradient(ellipse at 50% 45%, rgba(9, 22, 34, 0.18), rgba(3, 7, 11, 0.62));
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
@@ -352,7 +353,7 @@ body {
 }
 
 #menu.show {
-  display: grid;
+  display: flex;
 }
 
 .menu-card {
@@ -407,45 +408,6 @@ body {
   font-size: 20px;
   letter-spacing: 0.5em;
   color: var(--warn);
-}
-
-.menu-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 42px;
-  margin-top: 26px;
-}
-
-.menu-columns h2 {
-  margin: 0 0 8px;
-  padding-bottom: 6px;
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: 0.32em;
-  color: var(--teal-light);
-  border-bottom: 1px solid rgba(127, 214, 230, 0.3);
-}
-
-.menu-columns dl {
-  margin: 0;
-}
-
-.menu-columns dl > div {
-  display: grid;
-  grid-template-columns: 112px 1fr;
-  align-items: center;
-  margin: 9px 0;
-}
-
-.menu-columns dt {
-  display: flex;
-}
-
-.menu-columns dd {
-  margin: 0;
-  font-size: 16px;
-  letter-spacing: 0.07em;
-  color: rgba(241, 236, 224, 0.9);
 }
 
 kbd {
@@ -779,7 +741,124 @@ body.cursor-hidden * {
 }
 
 /* ---------------------------------------------------------------------------------------------
-   Touch mode (body.touch, see src/touch.js): on-screen pads, no keyboard hints
+   Pause screen: the controls drawn as keys
+   --------------------------------------------------------------------------------------------- */
+
+.keymap {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  gap: 16px 20px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.cap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  box-sizing: border-box;
+  width: 70px;
+  height: 58px;
+  padding: 0 4px;
+  text-align: center;
+  color: #e9e4d6;
+  background: linear-gradient(180deg, #18222c, #0b1118);
+  border: 2px solid #e9e4d6;
+  border-radius: 10px;
+  box-shadow: 0 4px 0 #04070a, inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.cap b {
+  font: 700 21px/1 var(--font);
+  letter-spacing: 0.04em;
+}
+
+.cap i {
+  font-style: normal;
+  font-size: 9.5px;
+  line-height: 1.15;
+  letter-spacing: 0.1em;
+  color: var(--teal-light);
+}
+
+.km-cluster {
+  display: grid;
+  grid-template-columns: repeat(3, 70px);
+  gap: 7px;
+}
+
+.km-cluster .cap:nth-child(1) {
+  grid-area: 1 / 2;
+}
+.km-cluster .cap:nth-child(2) {
+  grid-area: 2 / 1;
+}
+.km-cluster .cap:nth-child(3) {
+  grid-area: 2 / 2;
+}
+.km-cluster .cap:nth-child(4) {
+  grid-area: 2 / 3;
+}
+
+.km-or {
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  color: rgba(241, 236, 224, 0.6);
+}
+
+.km-mouse {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  line-height: 1.8;
+  letter-spacing: 0.12em;
+  color: rgba(241, 236, 224, 0.85);
+}
+
+.km-mouse svg {
+  flex: none;
+  width: 30px;
+  height: 46px;
+}
+
+.km-mouse p {
+  margin: 0;
+}
+
+.km-mouse b {
+  color: var(--teal-light);
+}
+
+.k-shift {
+  width: 100%;
+}
+
+.k-space {
+  grid-column: 2 / -1;
+  width: 100%;
+}
+
+.km-tools {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.km-tools .cap {
+  width: 98px;
+}
+
+.touchmap {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Touch mode (body.touch, see src/touch.js): a joystick on the left, the actions as diamonds on the
+   right, no keyboard hints
    --------------------------------------------------------------------------------------------- */
 
 #touch {
@@ -802,87 +881,138 @@ body.touch {
   overscroll-behavior: none;
 }
 
-.pad {
+/* The joystick: a dark disc with the four directions, and a diamond knob in the style of the tool
+   buttons. Up / down is the throttle, left / right the helm (touch.js). */
+#stick {
   position: absolute;
-  bottom: max(18px, env(safe-area-inset-bottom));
-  display: flex;
-  align-items: flex-end;
-  gap: 14px;
-}
-
-#pad-steer {
-  left: max(18px, env(safe-area-inset-left));
-}
-
-#pad-drive {
-  right: max(18px, env(safe-area-inset-right));
-}
-
-.pad .column {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.tbtn {
-  --size: clamp(60px, 17vmin, 92px);
+  left: max(14px, env(safe-area-inset-left));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  width: clamp(112px, 30vmin, 168px);
+  aspect-ratio: 1;
   pointer-events: auto;
   touch-action: none;
-  display: grid;
-  place-items: center;
-  width: var(--size);
-  height: var(--size);
+}
+
+.stick-base {
+  position: relative;
+  width: 100%;
+  height: 100%;
   box-sizing: border-box;
   border-radius: 50%;
   background: rgba(5, 7, 10, 0.62);
   border: 2px solid rgba(241, 236, 224, 0.4);
-  color: var(--cream);
-  transition: background 0.12s, box-shadow 0.12s;
 }
 
-.tbtn.small {
-  --size: clamp(46px, 12vmin, 66px);
-}
-
-.tbtn .icon {
-  width: 52%;
-  height: 52%;
+.stick-base .icon {
+  position: absolute;
+  width: 15%;
+  height: 15%;
   stroke-width: 2.4;
+  color: rgba(241, 236, 224, 0.5);
 }
 
-.tbtn:active,
-.tbtn.active {
+.s-up {
+  left: 42.5%;
+  top: 6%;
+}
+.s-down {
+  left: 42.5%;
+  bottom: 6%;
+}
+.s-left {
+  top: 42.5%;
+  left: 6%;
+}
+.s-right {
+  top: 42.5%;
+  right: 6%;
+}
+
+.stick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34%;
+  height: 34%;
+  margin: -17% 0 0 -17%;
+  box-sizing: border-box;
+  background: rgba(7, 12, 18, 0.92);
+  border: 3px solid var(--teal);
+  box-shadow: 0 0 0 2px #04070a;
+  transform: translate(var(--dx, 0px), var(--dy, 0px)) rotate(45deg);
+}
+
+#stick.active .stick-knob {
   background: #12505f;
   border-color: var(--teal-light);
-  box-shadow: 0 0 16px rgba(127, 214, 230, 0.55);
+  box-shadow: 0 0 0 2px #04070a, 0 0 16px rgba(127, 214, 230, 0.6);
 }
 
-/* Phones: no key hints, and the left panel keeps only the camera strip and the three tools. */
+/* The actions: six diamonds, honeycomb, anchor in the corner under the thumb. */
+#actions {
+  position: absolute;
+  right: max(8px, env(safe-area-inset-right));
+  bottom: max(8px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: repeat(3, 70px);
+  grid-auto-rows: 66px;
+  transform: scale(var(--ui));
+  transform-origin: 100% 100%;
+}
+
+#actions .tool:nth-child(-n + 3) {
+  translate: -35px 0;
+}
+
+.tool.active .diamond {
+  border-color: var(--teal-light);
+  background: #12505f;
+  box-shadow: 0 0 0 2px #04070a, 0 0 16px rgba(127, 214, 230, 0.6);
+}
+
+.tool.active .icon {
+  color: #fff;
+}
+
+/* No key hints; the left panel keeps only the stat box (the buttons are on the right now). */
 body.touch .key,
 body.touch .start-keys,
-body.touch .menu-columns,
-body.touch #strip-boost,
-body.touch #strip-time {
+body.touch .keymap,
+body.touch #left .strip,
+body.touch #tools .tool {
   display: none;
 }
 
 body.touch #left {
-  top: 14px;
-  bottom: auto;
+  inset: auto;
+  top: max(10px, env(safe-area-inset-top));
+  left: max(10px, env(safe-area-inset-left));
   transform-origin: 0 0;
 }
 
 body.touch #tools {
-  flex-wrap: wrap;
-  max-width: 260px;
+  margin: 0;
+  padding: 0;
 }
 
-body.touch #strip-camera {
-  min-width: 0;
+/* A phone held upright: the stat box is narrower, so it fits beside the dial. */
+@media (orientation: portrait) {
+  body.touch .stat {
+    min-width: 54px;
+    padding: 5px 7px 3px;
+  }
+  body.touch .stat b {
+    font-size: 18px;
+  }
 }
 
-.start-touch,
-.touch-help {
+/* The menu and mute buttons are at the top right, out of the thumbs' way. */
+body.touch #right {
+  top: max(14px, env(safe-area-inset-top));
+  right: env(safe-area-inset-right);
+}
+
+.start-touch {
   display: none;
 }
 
@@ -896,29 +1026,127 @@ body.touch .start-touch {
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
 }
 
-body.touch .touch-help {
-  display: block;
-  margin: 0 0 14px;
+/* The pause screen on a phone: the on-screen controls drawn small, at a readable size (not scaled
+   down with the window like the desktop card), scrolling if the screen is short. */
+body.touch #menu,
+body.touch #logbook {
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: 10px 0;
+  box-sizing: border-box;
+}
+
+body.touch #menu .menu-card {
+  width: min(540px, 94vw);
+  margin: auto;
+  padding: 18px 16px 14px;
+  transform: none;
+}
+
+body.touch #menu .menu-card h1 {
+  font-size: 36px;
+}
+
+body.touch #menu .menu-state {
   font-size: 15px;
-  line-height: 1.45;
-  color: rgba(241, 236, 224, 0.85);
 }
 
-body.touch .menu-foot {
-  display: none;
+body.touch .touchmap {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px 18px;
+  align-items: center;
+  margin-top: 14px;
 }
 
-/* Small screens (a phone held sideways): shrink the HUD panels. */
-@media (max-height: 520px) {
-  body.touch {
-    --ui: 0.55;
-  }
+.tm-stick {
+  text-align: center;
 }
 
-/* Touch mode: the menu and mute buttons go to the top right, out of reach of the thumb pads. */
-body.touch #right {
-  top: max(14px, env(safe-area-inset-top));
-  right: env(safe-area-inset-right);
+.tm-stick p,
+.tm-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.12em;
+  color: rgba(241, 236, 224, 0.8);
+}
+
+.stick-base.mini {
+  width: 92px;
+  height: 92px;
+  margin: 0 auto;
+}
+
+.tm-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 0;
+  justify-items: center;
+}
+
+.mini-tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+.mini-tool .diamond {
+  position: relative;
+  inset: auto;
+  width: 34px;
+  height: 34px;
+  margin: 8px 0 10px;
+}
+
+.mini-tool .diamond .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.tm-note {
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+body.touch .menu-audio {
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin-top: 14px;
+}
+
+body.touch .menu-audio input {
+  width: 110px;
+}
+
+body.touch .big-button {
+  padding: 12px 40px;
+  font-size: 19px;
+  margin-top: 14px;
+}
+
+body.touch .logbook-card {
+  transform: none;
+  width: min(900px, 96vw);
+  max-height: none;
+  margin: auto;
+  padding: 14px 14px 10px;
+}
+
+/* The whole logbook screen scrolls (not just the grid), so nothing is cut off or overlapped; the Close
+   button stays at the bottom edge (a phone has no Esc key). */
+body.touch #logbook .big-button {
+  position: sticky;
+  bottom: 8px;
+  z-index: 2;
+  background: rgba(5, 10, 15, 0.94);
+}
+
+body.touch #logbook-grid {
+  overflow: visible;
+  padding-right: 0;
 }
 
 /* ---------------------------------------------------------------------------------------------
@@ -1255,8 +1483,7 @@ body.touch #right {
   margin-top: 20px;
 }
 
-/* Touch: the card is not scaled below 0.7 (the menu scale gets to 0.55 on a phone held sideways) and
-   the reel button is tall: it is what the thumb holds. */
+/* Touch: the card is not scaled below 0.7 and the reel button is tall: it is what the thumb holds. */
 body.touch .fishing-card {
   transform: scale(max(var(--menu-scale, 1), 0.7));
 }
@@ -1271,7 +1498,8 @@ body.fishing-open #toast {
 }
 
 /* Touch: the pads are in the way, and the key hints mean nothing. */
-body.fishing-open #touch,
+body.fishing-open #stick,
+body.fishing-open #actions,
 body.touch .reel kbd,
 body.touch .text-button kbd {
   display: none;
@@ -1468,4 +1696,232 @@ body.touch .text-button kbd {
   .meter.danger .meter-fill {
     animation: none;
   }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Developer mode (src/devMode.js): the code gate and the panel. Hidden in the normal game.
+   --------------------------------------------------------------------------------------------- */
+
+#dev-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 50% 45%, rgba(9, 22, 34, 0.5), rgba(3, 7, 11, 0.88));
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  text-transform: uppercase;
+}
+
+#dev-gate.show {
+  display: flex;
+}
+
+.dev-card {
+  width: min(340px, 90vw);
+  padding: 26px 30px 18px;
+  text-align: center;
+}
+
+.dev-card h1 {
+  font-size: 34px;
+}
+
+#dev-dots {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 18px 0 16px;
+}
+
+#dev-dots i {
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 2px solid rgba(241, 236, 224, 0.6);
+  transform: rotate(45deg);
+  transition: background 0.12s, border-color 0.12s;
+}
+
+#dev-dots i.on {
+  background: var(--teal-light);
+  border-color: var(--teal-light);
+  box-shadow: 0 0 10px rgba(127, 214, 230, 0.6);
+}
+
+#dev-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+#dev-keypad button,
+#dev section button,
+#dev-tab {
+  font: 700 18px var(--font);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: rgba(5, 10, 15, 0.7);
+  border: 1px solid rgba(127, 214, 230, 0.45);
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+#dev-keypad button {
+  height: 48px;
+  font-size: 22px;
+}
+
+#dev-keypad button:hover,
+#dev section button:hover,
+#dev-tab:hover {
+  background: var(--teal);
+  box-shadow: 0 0 14px rgba(127, 214, 230, 0.4);
+}
+
+#dev-gate.wrong .dev-card {
+  animation: dev-shake 0.35s linear;
+}
+
+#dev-gate.wrong #dev-dots i {
+  border-color: var(--bad);
+  background: var(--bad);
+}
+
+#dev-gate.ok #dev-message {
+  color: var(--good);
+}
+
+@keyframes dev-shake {
+  25% {
+    translate: -8px 0;
+  }
+  75% {
+    translate: 8px 0;
+  }
+}
+
+#dev-tab {
+  position: fixed;
+  left: 0;
+  top: 44%;
+  z-index: 18;
+  display: none;
+  padding: 10px 7px;
+  font-size: 13px;
+  writing-mode: vertical-rl;
+  border-left: 0;
+}
+
+body.dev #dev-tab {
+  display: block;
+}
+
+#dev {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 18;
+  width: min(280px, 86vw);
+  box-sizing: border-box;
+  padding: 14px 16px;
+  overflow-y: auto;
+  text-transform: uppercase;
+  background: rgba(5, 8, 12, 0.93);
+  border-right: 1px solid rgba(127, 214, 230, 0.35);
+  transform: translateX(-102%);
+  transition: transform 0.2s;
+}
+
+#dev.show {
+  transform: none;
+}
+
+#dev header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  letter-spacing: 0.3em;
+  color: var(--warn);
+}
+
+#dev header button {
+  font-size: 24px;
+  color: var(--cream);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+#dev section {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(241, 236, 224, 0.15);
+}
+
+#dev h3 {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  color: var(--teal-light);
+}
+
+#dev small {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: rgba(241, 236, 224, 0.55);
+}
+
+.dev-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+#dev section button {
+  padding: 9px 4px;
+  font-size: 13px;
+}
+
+#dev section button.on {
+  background: #12505f;
+  border-color: var(--teal-light);
+  box-shadow: 0 0 10px rgba(127, 214, 230, 0.5);
+}
+
+#dev input[type='range'] {
+  width: 100%;
+  accent-color: var(--teal-light);
+}
+
+.dev-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 8px;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+}
+
+#dev .dev-lock {
+  width: 100%;
+  color: var(--warn);
+  border-color: rgba(240, 179, 74, 0.5);
+}
+
+/* The weather and time controls belong to developer mode only. */
+#strip-time {
+  display: none;
+}
+
+body.dev #strip-time {
+  display: flex;
 }

@@ -12,9 +12,9 @@ const RIGHT = ['KeyD', 'ArrowRight']
 //   lights    bool    L toggles the bow lamp
 //   horn      bool    H, true while the key is held
 //   planetView bool   C toggles the free planet camera
-//   fastForward bool  hold T to speed up the day/night clock
+//   fastForward bool  hold T to speed up the day/night clock (developer mode only)
 //   boost     bool    Shift, true while held
-//   weather   'auto' | 'calm' | 'breezy' | 'storm'   keys 4 / 1 / 2 / 3, read by world/weather.js
+//   weather   'auto' | 'calm' | 'breezy' | 'storm'   keys 4 / 1 / 2 / 3 (developer mode only), read by world/weather.js
 // App-level keys call back into main.js: Escape -> handlers.onMenu(), M -> handlers.onMute(),
 // B -> handlers.onLogbook() (the fish logbook; only while sailing).
 // While `interaction.enabled` is false (start screen, pause) only Escape works and the input
@@ -22,7 +22,7 @@ const RIGHT = ['KeyD', 'ArrowRight']
 export function setupInteraction(handlers = {}) {
   const down = new Set()
   const input = { throttle: 0, steer: 0, anchored: false, lights: false, horn: false, planetView: false, fastForward: false, boost: false, weather: 'auto' }
-  const interaction = { input, enabled: true }
+  const interaction = { input, enabled: true, dev: false, stick: { active: false, x: 0, y: 0 } } // stick: the touch joystick (touch.js) // dev: the weather keys and T work (set by devMode.js after the code was entered)
 
   // Which key was pressed? A letter key is identified by the letter printed on it
   // (event.key), so M is M on every keyboard layout; on an AZERTY keyboard the key labelled M is
@@ -46,7 +46,7 @@ export function setupInteraction(handlers = {}) {
     down.add(code)
     down.add(key)
 
-    if (key in WEATHER_KEYS) input.weather = WEATHER_KEYS[key]
+    if (interaction.dev && key in WEATHER_KEYS) input.weather = WEATHER_KEYS[key]
     if (key === 'Space' || key === 'KeyX') input.anchored = !input.anchored
     if (key === 'KeyL') input.lights = !input.lights
     if (key === 'KeyH') input.horn = true
@@ -62,6 +62,7 @@ export function setupInteraction(handlers = {}) {
   interaction.release = release
 
   addEventListener('keydown', (event) => {
+    if (event.target instanceof HTMLInputElement && event.code !== 'Escape') return // typing in / dragging a developer-panel control
     if (event.repeat) return // toggles must not flicker while a key is held
     if (event.ctrlKey || event.metaKey || event.altKey) return // leave browser shortcuts (Cmd+W, Ctrl+M ...) alone
     if (interaction.enabled && (event.code === 'Space' || event.code.startsWith('Arrow'))) event.preventDefault() // no page scrolling (menus keep the browser's key behaviour: Space presses a focused button, arrows move sliders)
@@ -82,10 +83,11 @@ export function setupInteraction(handlers = {}) {
       down.clear()
       input.horn = false
     }
-    input.throttle = axis(FORWARD, BACK)
-    input.fastForward = down.has('KeyT')
+    const analog = interaction.enabled && interaction.stick.active // the joystick replaces W S A D while a thumb is on it
+    input.throttle = analog ? interaction.stick.y : axis(FORWARD, BACK)
+    input.fastForward = interaction.dev && down.has('KeyT')
     input.boost = down.has('ShiftLeft') || down.has('ShiftRight')
-    input.steer += (axis(RIGHT, LEFT) - input.steer) * (1 - Math.exp(-delta * 8))
+    input.steer += ((analog ? interaction.stick.x : axis(RIGHT, LEFT)) - input.steer) * (1 - Math.exp(-delta * 8))
   }
 
   return interaction

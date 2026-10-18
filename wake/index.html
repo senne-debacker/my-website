@@ -76,18 +76,25 @@
         </div>
       </div>
 
-      <!-- Touch controls (only shown in touch mode, see touch.js): the same actions as the keys. -->
+      <!-- Touch controls (only shown in touch mode, see touch.js): a joystick bottom left (up / down = throttle,
+           left / right = steer) and the same actions as the keys, as diamonds, bottom right. -->
       <div id="touch">
-        <div class="pad" id="pad-steer">
-          <div class="tbtn" data-key="KeyA" data-hold aria-label="Steer left"><svg class="icon"><use href="#i-left" /></svg></div>
-          <div class="tbtn" data-key="KeyD" data-hold aria-label="Steer right"><svg class="icon"><use href="#i-right" /></svg></div>
-        </div>
-        <div class="pad" id="pad-drive">
-          <div class="tbtn small" id="touch-boost" data-key="ShiftLeft" data-hold aria-label="Boost"><svg class="icon"><use href="#i-gauge" /></svg></div>
-          <div class="column">
-            <div class="tbtn" data-key="KeyW" data-hold aria-label="Forward"><svg class="icon"><use href="#i-up" /></svg></div>
-            <div class="tbtn" data-key="KeyS" data-hold aria-label="Reverse"><svg class="icon"><use href="#i-down" /></svg></div>
+        <div id="stick" aria-label="Joystick">
+          <div class="stick-base">
+            <svg class="icon s-up"><use href="#i-up" /></svg>
+            <svg class="icon s-down"><use href="#i-down" /></svg>
+            <svg class="icon s-left"><use href="#i-left" /></svg>
+            <svg class="icon s-right"><use href="#i-right" /></svg>
+            <i class="stick-knob"></i>
           </div>
+        </div>
+        <div id="actions">
+          <div class="tool" id="t-camera" data-key="KeyC" aria-label="Camera"><div class="diamond"><svg class="icon"><use href="#i-eye" /></svg></div></div>
+          <div class="tool" id="t-lamp" data-key="KeyL" aria-label="Lamp"><div class="diamond"><svg class="icon"><use href="#i-bulb" /></svg></div></div>
+          <div class="tool" id="t-horn" data-key="KeyH" data-hold aria-label="Horn"><div class="diamond"><svg class="icon"><use href="#i-horn" /></svg></div></div>
+          <div class="tool" id="t-book" data-key="KeyB" aria-label="Fish logbook"><div class="diamond"><svg class="icon"><use href="#i-book" /></svg></div></div>
+          <div class="tool" id="touch-boost" data-key="ShiftLeft" data-hold aria-label="Boost"><div class="diamond"><svg class="icon"><use href="#i-gauge" /></svg></div></div>
+          <div class="tool" id="t-anchor" data-key="Space" aria-label="Anchor"><div class="diamond"><svg class="icon"><use href="#i-anchor" /></svg></div></div>
         </div>
       </div>
 
@@ -104,7 +111,7 @@
         <h1>Wake</h1>
       </header>
       <footer>
-        <p class="start-touch">Hold the arrows to steer and sail</p>
+        <p class="start-touch">Drag the stick to steer and sail</p>
         <ul class="start-keys">
           <li><kbd>W</kbd><kbd>S</kbd><span>Throttle</span></li>
           <li><kbd>A</kbd><kbd>D</kbd><span>Steer</span></li>
@@ -117,7 +124,7 @@
       </footer>
     </div>
 
-    <!-- Pause screen: every control, and the volumes. -->
+    <!-- Pause screen: the controls drawn as a keyboard (or, on a phone, as the on-screen controls), and the volumes. -->
     <div id="menu">
       <div class="menu-card">
         <header>
@@ -125,32 +132,56 @@
           <p class="menu-state">Paused</p>
         </header>
 
-        <p class="touch-help">Left thumb: steer. Right thumb: forward and back, and the gauge button for boost. Lamp, anchor, horn and the fish logbook are the diamonds at the top left; drop the anchor over bubbling water to fish. Drag the sea to look round the boat, pinch to zoom, and the top-right buttons pause and mute.</p>
+        <div class="keymap" aria-label="Keyboard controls">
+          <div class="km-cluster km-wasd">
+            <div class="cap k-up"><b>W</b><i>Forward</i></div>
+            <div class="cap"><b>A</b><i>Port</i></div>
+            <div class="cap"><b>S</b><i>Back</i></div>
+            <div class="cap"><b>D</b><i>Starboard</i></div>
+          </div>
+          <span class="km-or">or</span>
+          <div class="km-cluster km-arrows">
+            <div class="cap k-up"><b>&uarr;</b></div>
+            <div class="cap"><b>&larr;</b></div>
+            <div class="cap"><b>&darr;</b></div>
+            <div class="cap"><b>&rarr;</b></div>
+          </div>
+          <div class="km-mouse">
+            <svg viewBox="0 0 40 60" aria-hidden="true"><rect x="4" y="3" width="32" height="54" rx="16" fill="none" stroke="#e9e4d6" stroke-width="2.4" /><path d="M20 3v22M4 25h32" fill="none" stroke="#e9e4d6" stroke-width="2" /><rect x="17" y="9" width="6" height="11" rx="3" fill="#7fd6e6" /></svg>
+            <p><b>Drag</b> look<br /><b>Wheel</b> zoom</p>
+          </div>
+          <div class="cap wide k-shift"><b>Shift</b><i>Boost</i></div>
+          <div class="cap k-space"><b>Space</b><i>Drop / raise the anchor &middot; reel in at the bubbles</i></div>
+          <div class="km-tools">
+            <div class="cap"><b>L</b><i>Lamp</i></div>
+            <div class="cap"><b>H</b><i>Horn (hold)</i></div>
+            <div class="cap"><b>B</b><i>Logbook</i></div>
+            <div class="cap"><b>C</b><i>Camera</i></div>
+            <div class="cap"><b>M</b><i>Mute</i></div>
+            <div class="cap"><b>Esc</b><i>Pause</i></div>
+          </div>
+        </div>
 
-        <div class="menu-columns">
-          <section>
-            <h2>At the helm</h2>
-            <dl>
-              <div><dt><kbd>W</kbd><kbd>S</kbd></dt><dd>Throttle / reverse</dd></div>
-              <div><dt><kbd>A</kbd><kbd>D</kbd></dt><dd>Steer (you need speed)</dd></div>
-              <div><dt><kbd class="wide">Space</kbd></dt><dd>Drop / raise the anchor (and fish at the bubbles)</dd></div>
-              <div><dt><kbd class="wide">Shift</kbd></dt><dd>Boost (8 knots)</dd></div>
-              <div><dt><kbd>H</kbd></dt><dd>Horn (hold it)</dd></div>
-              <div><dt><kbd>L</kbd></dt><dd>Bow lamp</dd></div>
-              <div><dt><kbd>B</kbd></dt><dd>Fish logbook</dd></div>
-              <div><dt><kbd>C</kbd></dt><dd>Chase camera / planet view</dd></div>
-            </dl>
-          </section>
-          <section>
-            <h2>Sea and sky</h2>
-            <dl>
-              <div><dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></dt><dd>Calm / breezy / storm</dd></div>
-              <div><dt><kbd>4</kbd></dt><dd>Weather on its own</dd></div>
-              <div><dt><kbd>T</kbd></dt><dd>Hold to speed up time</dd></div>
-              <div><dt><kbd>M</kbd></dt><dd>Mute sound</dd></div>
-              <div><dt><kbd class="wide">Esc</kbd></dt><dd>Pause / resume</dd></div>
-            </dl>
-          </section>
+        <div class="touchmap" aria-label="Touch controls">
+          <div class="tm-stick">
+            <div class="stick-base mini">
+              <svg class="icon s-up"><use href="#i-up" /></svg>
+              <svg class="icon s-down"><use href="#i-down" /></svg>
+              <svg class="icon s-left"><use href="#i-left" /></svg>
+              <svg class="icon s-right"><use href="#i-right" /></svg>
+              <i class="stick-knob"></i>
+            </div>
+            <p>Drag to sail and steer</p>
+          </div>
+          <div class="tm-buttons">
+            <div class="mini-tool"><div class="diamond"><svg class="icon"><use href="#i-eye" /></svg></div><span>Camera</span></div>
+            <div class="mini-tool"><div class="diamond"><svg class="icon"><use href="#i-bulb" /></svg></div><span>Lamp</span></div>
+            <div class="mini-tool"><div class="diamond"><svg class="icon"><use href="#i-horn" /></svg></div><span>Horn</span></div>
+            <div class="mini-tool"><div class="diamond"><svg class="icon"><use href="#i-book" /></svg></div><span>Logbook</span></div>
+            <div class="mini-tool"><div class="diamond"><svg class="icon"><use href="#i-gauge" /></svg></div><span>Boost</span></div>
+            <div class="mini-tool"><div class="diamond"><svg class="icon"><use href="#i-anchor" /></svg></div><span>Anchor</span></div>
+          </div>
+          <p class="tm-note">Anchor over bubbling water to fish. Drag the sea to look round, pinch to zoom. The top-right buttons pause and mute.</p>
         </div>
 
         <div class="menu-audio">
@@ -159,7 +190,6 @@
         </div>
 
         <button id="menu-action" class="big-button" type="button">Resume</button>
-        <p class="menu-foot">Drag looks round the boat (it swings back by itself) &middot; Wheel zooms &middot; Enter also works</p>
       </div>
     </div>
 
@@ -242,6 +272,48 @@
       <span id="sound-button-label">Sound on</span>
       <span class="key">M</span>
     </button>
+
+    <!-- Developer mode (src/devMode.js): open the page with ?dev, enter the code, then use the DEV tab. -->
+    <div id="dev-gate">
+      <div class="menu-card dev-card">
+        <header>
+          <h1>Developer</h1>
+          <p class="menu-state">Enter the code</p>
+        </header>
+        <div id="dev-dots"><i></i><i></i><i></i><i></i></div>
+        <div id="dev-keypad">
+          <button type="button" data-digit="1">1</button><button type="button" data-digit="2">2</button><button type="button" data-digit="3">3</button>
+          <button type="button" data-digit="4">4</button><button type="button" data-digit="5">5</button><button type="button" data-digit="6">6</button>
+          <button type="button" data-digit="7">7</button><button type="button" data-digit="8">8</button><button type="button" data-digit="9">9</button>
+          <button type="button" data-action="cancel" aria-label="Cancel">&times;</button><button type="button" data-digit="0">0</button><button type="button" data-action="back" aria-label="Delete">&larr;</button>
+        </div>
+        <p class="menu-foot" id="dev-message">Esc continues as a player</p>
+      </div>
+    </div>
+    <button id="dev-tab" type="button">Dev</button>
+    <aside id="dev">
+      <header><b>Developer</b><button id="dev-close" type="button" aria-label="Close">&times;</button></header>
+      <section>
+        <h3>Weather <small>keys 1 2 3 4</small></h3>
+        <div class="dev-row">
+          <button type="button" data-weather="calm">Calm</button><button type="button" data-weather="breezy">Breezy</button><button type="button" data-weather="storm">Storm</button><button type="button" data-weather="auto">Auto</button>
+        </div>
+      </section>
+      <section>
+        <h3>Time <small id="dev-clock">--:--</small></h3>
+        <input id="dev-time" type="range" min="0" max="24" step="0.25" value="18" />
+        <label class="dev-check"><input id="dev-freeze" type="checkbox" /> Freeze the clock</label>
+        <small>Hold T to fast-forward</small>
+      </section>
+      <section>
+        <h3>Fishing</h3>
+        <div class="dev-row">
+          <button type="button" id="dev-fight">Start a fight</button><button type="button" id="dev-refill">Refill spots</button>
+          <button type="button" id="dev-fill">Fill logbook</button><button type="button" id="dev-clear">Clear logbook</button>
+        </div>
+      </section>
+      <section><button type="button" id="dev-lock" class="dev-lock">Lock developer mode</button></section>
+    </aside>
 
     <div id="loading">
       <h1>Wake</h1>

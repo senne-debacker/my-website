@@ -1,5 +1,6 @@
 import { Vector3 } from 'three/webgpu'
 import { DAY } from './config.js'
+import { isTouch } from './touch.js'
 
 // The in-game interface, modelled on Dredge's: a ring that turns with the time of day with the
 // anchor marker as "now", a pill with the day and the clock, a compass, diamond buttons for the
@@ -62,13 +63,17 @@ export function createHud() {
   }
 
   // Scale the interface with the window.
+  // On a phone the HUD is sized from both sides of the screen (it is narrow upright, short sideways),
+  // and the menus are not scaled at all: they are laid out for the screen and scroll (style.css).
   const rescale = () => {
     const root = document.documentElement.style
-    root.setProperty('--ui', Math.min(1.4, Math.max(0.7, innerHeight / 900)).toFixed(3))
-    root.setProperty('--menu-scale', Math.min(1.15, Math.max(0.55, Math.min(innerHeight / 780, innerWidth / 820))).toFixed(3))
+    const ui = isTouch() ? Math.min(1, Math.max(0.6, Math.min(innerHeight / 640, innerWidth / 520))) : Math.min(1.4, Math.max(0.7, innerHeight / 900))
+    root.setProperty('--ui', ui.toFixed(3))
+    root.setProperty('--menu-scale', isTouch() ? '1' : Math.min(1.15, Math.max(0.55, Math.min(innerHeight / 780, innerWidth / 820))).toFixed(3))
   }
   rescale()
   addEventListener('resize', rescale)
+  addEventListener('touchmode', rescale)
 
   let toastTimer = 0
   const toastElement = $('toast')
@@ -95,13 +100,20 @@ export function createHud() {
       change('anchor', s.anchored, (v) => {
         $('dial-anchor').classList.toggle('down', v)
         $('tool-anchor').classList.toggle('on', v)
+        $('t-anchor').classList.toggle('on', v) // (the same buttons in touch mode)
       })
-      change('lamp', s.lights, (v) => $('tool-lamp').classList.toggle('on', v))
+      change('lamp', s.lights, (v) => {
+        $('tool-lamp').classList.toggle('on', v)
+        $('t-lamp').classList.toggle('on', v)
+      })
       change('boost', s.boost, (v) => {
         $('strip-boost').classList.toggle('active', v)
         $('touch-boost').classList.toggle('active', v)
       })
-      change('horn', s.horn, (v) => $('tool-horn').classList.toggle('on', v))
+      change('horn', s.horn, (v) => {
+        $('tool-horn').classList.toggle('on', v)
+        $('t-horn').classList.toggle('on', v)
+      })
 
       change('speed', Math.round(s.speed * 5), (v) => ($('stat-speed').textContent = v)) // 1 unit/s reads as 5 knots
       const [label, tone] = seaState(s.storm)
@@ -111,7 +123,10 @@ export function createHud() {
         element.className = tone
       })
 
-      change('camera', s.camera, (v) => ($('camera-label').textContent = v === 'chase' ? 'Chase' : 'Planet'))
+      change('camera', s.camera, (v) => {
+        $('camera-label').textContent = v === 'chase' ? 'Chase' : 'Planet'
+        $('t-camera').classList.toggle('on', v !== 'chase')
+      })
       change('muted', s.muted, (v) => {
         $('sound-icon').setAttribute('href', v ? '#i-muted' : '#i-speaker')
         $('strip-sound').classList.toggle('off', v)

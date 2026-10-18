@@ -74,6 +74,10 @@ export function createLogbook({ onClose, storage } = {}) {
   const tiles = new Map() // species id -> its button
   let selected = FISH_SPECIES[0].id
   let open = false
+  let openedAt = 0
+  // The tap that opens the book (it opens on pointerdown) is still going on when the book appears, and
+  // its click lands on whatever is under the finger now: ignore pointer closes for a moment.
+  const tapSettled = () => performance.now() - openedAt > 400
 
   // Built once; refresh() only changes classes and text afterwards.
   for (const [rarity, info] of Object.entries(RARITIES)) {
@@ -155,8 +159,8 @@ export function createLogbook({ onClose, storage } = {}) {
       if (!event.repeat) close()
     }
   }
-  closeButton.addEventListener('click', close)
-  root.addEventListener('pointerdown', (event) => event.target === root && close()) // a click on the dim area
+  closeButton.addEventListener('click', () => tapSettled() && close())
+  root.addEventListener('pointerdown', (event) => event.target === root && tapSettled() && close()) // a click on the dim area
 
   refresh()
 
@@ -172,9 +176,15 @@ export function createLogbook({ onClose, storage } = {}) {
       refresh()
       return result
     },
+    // Empties the book (developer mode).
+    reset() {
+      store.clear()
+      refresh()
+    },
     open() {
       if (open) return
       open = true
+      openedAt = performance.now()
       refresh()
       root.classList.add('show')
       closeButton.focus({ preventScroll: true })

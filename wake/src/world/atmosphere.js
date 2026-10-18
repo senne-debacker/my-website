@@ -106,7 +106,9 @@ export function createAtmosphere({ scene, sun, moon, fill }) {
     // from the planet centre. `spaceAmount`: 0 in the chase camera, 1 in planet
     // view (the sky becomes a star field and the haze is removed). `weather`: the
     // levels from world/weather.js ({ storm, cover, rain }). `flash`: lightning brightness 0..1.
-    update(timeOfDay, localUp, cameraHeight, spaceAmount, weather, flash = 0) {
+    // `fogScale` 0..1: the haze thins out as the camera is zoomed out (it is thick by distance, so the
+    // boat would otherwise vanish in it): main.js passes (default distance / distance to the boat).
+    update(timeOfDay, localUp, cameraHeight, spaceAmount, weather, flash = 0, fogScale = 1) {
       if (!started) {
         lastUp.copy(localUp)
         started = true
@@ -169,7 +171,7 @@ export function createAtmosphere({ scene, sun, moon, fill }) {
       fill.intensity = state.hemiIntensity + (0.4 - state.hemiIntensity) * spaceAmount
 
       scene.fog.color.copy(state.horizon) // far water fades into the horizon colour
-      scene.fog.density = DAY.fogDensity * (1 + 1.2 * cover) * (1 - spaceAmount)
+      scene.fog.density = DAY.fogDensity * (1 + 1.2 * cover) * (1 - spaceAmount) * fogScale
 
       uniforms.sunDir.value.copy(sunDir)
       uniforms.localUp.value.copy(localUp)

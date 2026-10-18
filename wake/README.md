@@ -145,7 +145,7 @@ The scene is rendered once into a texture, then a TSL node graph adds bloom (onl
 - Three.js with `WebGPURenderer` (no `WebGLRenderer`; the app shows an error instead of falling back to WebGL2).
 - Shader written as TSL node materials (`MeshStandardNodeMaterial` with `positionNode` / `colorNode`), no `ShaderMaterial` or `RawShaderMaterial`.
 - The original Shadertoy URLs are credited at the top of this file (the simplex noise), in "Raindrops on the water" (the rain ripples) and in "Third-party code" (the fish schooling), and in the header of the shader files.
-- The shader responds to user input: the weather keys change the wave amplitude and foam in real time, and the boat's wake is drawn into the water by the shader from where and how fast you sail.
+- The shader responds to user input: the boat's wake is drawn into the water by the shader from where and how fast you sail, the foam patches over the fishing spots follow what you fish, and the weather (wave amplitude, foam, rain ripples) can be forced in the **developer mode** (`1` `2` `3` `4` and a panel), which is locked in the normal game; the weather otherwise cycles by itself.
 
 ## Start screen
 
@@ -153,7 +153,7 @@ The game opens on a close-up of the boat with the title above it, five key hints
 
 ## Controls
 
-The start screen shows only the five essentials; `Esc` pauses (so does switching to another window) and opens the full list, with the volume sliders.
+The start screen shows only the five essentials; `Esc` pauses (so does switching to another window) and opens the pause screen, which draws the controls as a keyboard (WASD or the arrows, Space, Shift, L H B C M Esc and the mouse) next to the volume sliders.
 
 | Input | Action |
 | --- | --- |
@@ -164,12 +164,9 @@ The start screen shows only the five essentials; `Esc` pauses (so does switching
 | `H` (hold) | Horn |
 | `B` | Fish logbook (also a button in the HUD) |
 | `L` | Bow lamp on / off (spotlight on the water, glowing windows, light cone) |
-| Hold `T` | Fast-forward the day/night cycle |
 | `C` | Switch between the chase camera and a free orbit around the planet |
 | Mouse wheel | Zoom the chase camera |
 | Drag (left button) | Look round the boat in chase view (it swings back behind the boat after 3 s, or as soon as you drive forward; double-click puts it back at once); orbit in planet view |
-| `1` / `2` / `3` | Force calm / breezy / storm weather |
-| `4` | Automatic weather again (clear, overcast, storm, clearing, repeat) |
 | `M` | Mute / unmute all sound (works on every screen; the start and pause screens also have a Sound button, and the setting is remembered) |
 | `Esc` | Pause / resume |
 
@@ -179,7 +176,7 @@ The interface follows Dredge's: a ring that turns with the time of day (the anch
 
 ### On a phone or tablet
 
-When the main pointer is a finger (or after the first touch), the page switches to **touch mode** ([src/touch.js](src/touch.js)): two pads appear, steer left / right at the bottom left, forward / reverse and a boost button at the bottom right, all held with the thumbs (several at once, so you can steer and sail together). The lamp, anchor, horn and camera buttons and the menu / mute buttons are the same clickable HUD buttons as on the desktop, just tapped. Drag on the sea to look round the boat, pinch to zoom. The keyboard hints are hidden and the pause screen explains the buttons instead. On phones the game also runs in a **low quality mode** (`src/quality.js`: pixel ratio 1 instead of up to 2, and no wave pattern in the wake), because it draws a lot per pixel; `?low` / `?high` force it either way. The pads are not shown on desktop; to try touch mode in a desktop browser add `?touch` to the address, and `?desktop` forces it off.
+When the main pointer is a finger (or after the first touch), the page switches to **touch mode** ([src/touch.js](src/touch.js)): a **joystick** appears at the bottom left (up / down is the throttle and reverse, left / right the helm, and a gentle push is a gentle throttle) and the other buttons as diamonds at the bottom right, in the same style as the rest of the interface: camera, lamp, horn, fish logbook, boost (hold it) and the anchor in the corner under the thumb. You can steer with one thumb and boost with the other. The menu / mute buttons are at the top right. Drag on the sea to look round the boat, pinch to zoom. The keyboard hints are hidden and the pause screen shows the on-screen controls instead; it works upright and sideways. On phones the game also runs in a **low quality mode** (`src/quality.js`: pixel ratio 1 instead of up to 2, and no wave pattern in the wake), because it draws a lot per pixel; `?low` / `?high` force it either way. The stick and the buttons are not shown on desktop; to try touch mode in a desktop browser add `?touch` to the address, and `?desktop` forces it off.
 
 ## Your own boat
 
@@ -207,6 +204,7 @@ src/
   interaction.js     keyboard input
   hud.js             the in-game interface (day ring, compass, tools, stats)
   menu.js            start screen and pause screen
+  devMode.js         developer mode (the code gate and panel; locked in the normal game)
   audio/             synthesised sound effects, engine / water / rain layers, music
   camera/            title close-up and swing, chase camera, the camera rig
   scene/             planet mesh, lighting, boat model, sky dome, clouds, rain, islands, lighthouse, buoys, fishing spots

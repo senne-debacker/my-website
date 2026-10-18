@@ -449,6 +449,20 @@ export const LIGHTHOUSE = {
   color: '#ffe3a8',
 }
 
+// --- Wind and the boat's flag -----------------------------------------------------
+// world/wind.js: a direction that wanders and a strength that gusts; scene/flag.js: the flag.
+export const WIND = {
+  baseBearing: 1.2, // the way it mostly blows towards, radians clockwise from north
+  calm: 0.3, // strength in calm weather (0..1); a storm takes it to 1
+}
+export const FLAG = {
+  cuts: 14, // the flag's length is cut into this many pieces (so that it can bend)
+  waves: 1.4, // how many waves fit along the flag
+  amplitude: 0.32, // sideways swing at the tip as a fraction of the flag's length (at full wind)
+  speed: [5, 14], // wave speed, rad / s, in a calm and in a gale
+  turnRate: 4, // 1 / s, how quickly the flag swings round when the wind (or the boat's heading) changes
+}
+
 // --- Fishing ---------------------------------------------------------------------
 // The hold-and-release fight (fishing/fishingMinigame.js). Progress and tension both run 0..1:
 // holding the reel fills progress slowly and tension quickly, letting go drains tension.
@@ -475,8 +489,7 @@ export const FISHING = {
     clearance: 0.9, // from the edge of any island, rock or buoy (world units): room to anchor beside it
     gap: 1.8, // between two spots
     startClear: 0.9, // none closer than this to where the boat starts (except the near-start one)
-    triggerRadius: 0.45, // anchor within this distance (over the sea, world units) = the fish bite
-    hintRadius: 2.2, // within this the game says that fish are biting
+    triggerRadius: 0.45, // anchor within this distance (over the sea, world units) = the fish bite; the "fish are biting" message shows within the same distance, so it only appears when Space works
     // (a spot that gave up a fish stays empty until the clock passes midnight, see main.js)
     // The patch of foam the water shader paints at each spot (tsl/spotFoam.js): a disc with rings
     // lapping outwards. It is what you see from far away and from space.

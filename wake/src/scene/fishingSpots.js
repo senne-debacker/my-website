@@ -13,7 +13,7 @@ const arc = (a, b) => Math.acos(Math.min(1, Math.max(-1, a.dot(b)))) * R // dist
 // stays empty (its bubbles dying away) until refill() is called, which main.js does at midnight. Which spot you are at and the fight itself are main.js' and the minigame's business.
 export function createFishingSpots(list) {
   const { bubbles } = FISHING.spots
-  const { material, frame, visible } = createFishingBubbleMaterial(list.length)
+  const { material, frame } = createFishingBubbleMaterial(list.length)
 
   const mesh = new InstancedMesh(new IcosahedronGeometry(1, 0), material, Math.max(1, list.length * bubbles))
   const identity = new Matrix4()
@@ -36,9 +36,8 @@ export function createFishingSpots(list) {
     mesh,
     spots,
 
-    // `delta` is real time (the bubbles fade in and out even while the game is paused); `space` is 0
-    // in the chase view and 1 in planet view.
-    update({ delta, time, storm, space }) {
+    // `delta` is real time (the bubbles fade in and out even while the game is paused).
+    update({ delta, time, storm }) {
       const ease = 1 - Math.exp(-delta * 1.2)
       for (const spot of spots) {
         spot.level += ((spot.empty ? 0 : 1) - spot.level) * ease
@@ -46,7 +45,6 @@ export function createFishingSpots(list) {
         uniforms.fishingSpots.array[spot.index].set(x, y, z, spot.level)
         frame.array[spot.index].w = sampleHeight(spot.dir, time, storm) // the water there, from the CPU twin of the waves
       }
-      visible.value = 1 - space // the bubbles are for the chase view; from space the foam patch marks the spot
     },
 
     // The nearest spot with fish in it within `radius` of `dir` (a unit direction from the planet
