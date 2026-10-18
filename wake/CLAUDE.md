@@ -337,6 +337,10 @@ User asked for: effects in planet view (rain, ripples, fog, fishing particles), 
 - [x] `tests/tilt.check.mjs` (17 checks, in `npm run check`): the same wheel angle gives the same roll in portrait and both landscapes, direction of the helm, dead zone, full helm, wrap-around, flat phone ignored. Checked in headless Chrome (mobile emulation, synthetic `DeviceOrientationEvent`s): switch on both screens, tilt on -> helm +0.81 at +25 degrees, -0.80 at -25, 0 inside the dead zone, 1 at 60; the neutral moves when resuming at another angle; back to the joystick; saved choice with no sensor falls back with the message
 - NOT checked: a real phone (the sensor signs follow the W3C spec and the maths is verified against it, but not against hardware), iOS permission dialog. The pause screen's switch sits below the touch map, so on a short landscape phone the card scrolls to reach it
 
+### Step 32 — Phone buttons sized by importance  *(done)*
+- [x] The six diamonds were all the same size. Now (`#actions` in `style.css`, each tool has `--s` size, `--x` / `--y` position): **anchor and boost big** (100 px, the bottom row; anchor in the corner under the thumb), **lamp medium** (68), **camera, horn, logbook small** (56) in a row above. Diamonds are 1.1 x their box wide on the diagonal, so the spacing is >= 1.1 x the size. A boat-themed restyle (brass wheel, portholes) was tried and rejected by the user: not wanted
+- Gotcha: `#actions .tool { --s }` has higher specificity than `#t-anchor { --s }`: the per-button rules are written `#actions #t-anchor`
+
 ## Final requirements check (re-run before handing in)
 
 ```

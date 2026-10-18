@@ -948,21 +948,43 @@ body.touch {
   box-shadow: 0 0 0 2px #04070a, 0 0 16px rgba(127, 214, 230, 0.6);
 }
 
-/* The actions: six diamonds, honeycomb, anchor in the corner under the thumb. */
+/* The actions, by importance: anchor and boost are big (anchor in the corner under the thumb; boost
+   is held), the lamp is medium, camera / horn / logbook are small. Each tool sits at --x from the right
+   edge and --y from the bottom of the block, and is --s big (the diamond and its icon follow --s). */
 #actions {
   position: absolute;
   right: max(8px, env(safe-area-inset-right));
   bottom: max(8px, env(safe-area-inset-bottom));
-  display: grid;
-  grid-template-columns: repeat(3, 70px);
-  grid-auto-rows: 66px;
+  width: 292px;
+  height: 190px;
   transform: scale(var(--ui));
   transform-origin: 100% 100%;
 }
 
-#actions .tool:nth-child(-n + 3) {
-  translate: -35px 0;
+#actions .tool {
+  --s: 56px;
+  position: absolute;
+  width: var(--s);
+  height: var(--s);
+  right: var(--x);
+  bottom: var(--y);
 }
+
+#actions .diamond {
+  inset: calc(var(--s) * 0.11);
+}
+
+#actions .diamond .icon {
+  width: calc(var(--s) * 0.4);
+  height: calc(var(--s) * 0.4);
+}
+
+#actions #t-anchor { --s: 100px; --x: 0px; --y: 0px; }
+#actions #touch-boost { --s: 100px; --x: 118px; --y: 0px; }
+#actions #t-lamp { --s: 68px; --x: 16px; --y: 120px; }
+#actions #t-horn { --x: 96px; --y: 124px; }
+#actions #t-camera { --x: 164px; --y: 124px; }
+#actions #t-book { --x: 232px; --y: 124px; }
 
 .tool.active .diamond {
   border-color: var(--teal-light);
