@@ -1,5 +1,5 @@
 import { Vector3 } from 'three/webgpu'
-import { PLANET, WORLD, BOAT } from '../config.js'
+import { PLANET, WORLD, BOAT, FISHING } from '../config.js'
 import { createIslandShape } from '../physics/islandShape.js'
 
 // Where everything in the world goes. Fully deterministic (seeded), and shared by
@@ -106,6 +106,34 @@ export function createLayout() {
   keep(rocks, (rock) => rock.radius)
   keep(buoys, () => 0.3)
 
+  // Fishing spots: open water with room to anchor beside it. One close to the start (so there is
+  // something to find at once), some in the big ocean, the rest anywhere. They get their own random
+  // numbers and are placed last, so nothing above changes.
+  const fishingSpots = []
+  {
+    const cfg = FISHING.spots
+    const spotRandom = mulberry32(cfg.seed)
+    const open = (dir, minStart) =>
+      arc(dir, start.dir) > minStart &&
+      islands.every((island) => arc(dir, island.dir) > footprint(island.radius) + cfg.clearance) &&
+      rocks.every((rock) => arc(dir, rock.dir) > rock.radius + cfg.clearance) &&
+      buoys.every((buoy) => arc(dir, buoy.dir) > 0.6) &&
+      fishingSpots.every((spot) => arc(dir, spot.dir) > cfg.gap)
+    const add = (dir) => fishingSpots.push({ dir, seed: spotRandom() * 100 })
+
+    const near = fromStart(start, cfg.nearStart.bearing, cfg.nearStart.distance)
+    if (cfg.count > 0 && open(near, 0)) add(near)
+    const oceanTarget = Math.min(cfg.count, fishingSpots.length + cfg.oceanCount) // the near-start spot is not one of the ocean ones
+    for (let tries = 0; fishingSpots.length < oceanTarget && tries < 4000; tries++) {
+      const dir = randomDirection(spotRandom)
+      if (arc(dir, ocean.dir) < ocean.radius * 0.85 && open(dir, cfg.startClear)) add(dir)
+    }
+    for (let tries = 0; fishingSpots.length < cfg.count && tries < 4000; tries++) {
+      const dir = randomDirection(spotRandom)
+      if (open(dir, cfg.startClear)) add(dir)
+    }
+  }
+
   // What the boat cannot sail through, and what the water draws shore foam around.
   // Islands get their exact coastline (a table of shoreline distances per bearing);
   // rocks are plain circles.
@@ -119,5 +147,5 @@ export function createLayout() {
     ...rocks.map((rock) => ({ dir: rock.dir, radius: rock.radius })),
   ]
 
-  return { start, islands, rocks, buoys, colliders, bodies, ocean }
+  return { start, islands, rocks, buoys, colliders, bodies, ocean, fishingSpots }
 }

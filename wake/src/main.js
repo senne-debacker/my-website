@@ -2,7 +2,7 @@ import {
   WebGPURenderer, Scene, PerspectiveCamera, Color, Vector3, ACESFilmicToneMapping,
 } from 'three/webgpu'
 
-import { PALETTE, INTRO, BOAT } from './config.js'
+import { PALETTE, INTRO, BOAT, FISHING } from './config.js'
 import { uniforms } from './uniforms.js'
 import { createPlanet } from './scene/planet.js'
 import { createFish } from './scene/fish.js'
@@ -21,6 +21,10 @@ import { createLightning } from './world/lightning.js'
 import { createWake } from './world/wake.js'
 import { createLayout } from './world/layout.js'
 import { createWorld } from './scene/world.js'
+import { createFishingSpots } from './scene/fishingSpots.js'
+import { createFishingMinigame } from './fishing/fishingMinigame.js'
+import { createLogbook } from './fishing/logbook.js'
+import { rollFish } from './fishing/fishDatabase.js'
 import { createBoatState, createBoatPose, computeBoatPose } from './physics/boat.js'
 import { createBoatDynamics, applyBoatWeight } from './physics/boatDynamics.js'
 import { stepBoat } from './physics/boatMotion.js'
@@ -64,14 +68,16 @@ async function main() {
 
   const { sun, moon, fill } = createLighting()
   const boat = createBoat()
+  await boat.ready // your own boat model (public/models/boat.glb), if there is one, replaces the built-in boat
   const layout = createLayout() // where islands, rocks and buoys are (also used for collisions)
   const world = createWorld(layout)
+  const spots = createFishingSpots(layout.fishingSpots) // patches of bubbling water: drop the anchor on one to fish
   const sky = createSky()
   const clouds = createClouds()
   const rain = createRain()
   const fish = createFish(renderer, layout)
   const planet = createPlanet(fish) // the water paints the fish's shadows
-  scene.add(sky.mesh, planet, world.group, clouds.group, rain.mesh, sun, moon, fill, boat.root)
+  scene.add(sky.mesh, planet, world.group, spots.mesh, clouds.group, rain.mesh, sun, moon, fill, boat.root)
 
   const clock = createClock()
   const weather = createWeather()
@@ -97,6 +103,36 @@ async function main() {
   const hud = createHud()
   const audio = createAudio()
   const dolphins = createDolphins({ scene, layout, audio })
+
+  // --- Fishing: the anchor goes down over a bubbling spot -> the minigame (src/fishing/) ------------------
+  // The fish is rolled when the fight starts but stays hidden until it is landed, so that a rarer
+  // fish can pull harder. The world keeps running during the fight (state 'fishing'); only the
+  // controls are locked, and the anchor stays down afterwards.
+  let fishingSpot = null // the spot being fished
+  const logbook = createLogbook({ onClose: () => state === 'logbook' && setState('playing') })
+  const fishing = createFishingMinigame({
+    logbook,
+    onFrame: (fight) => audio.reel(fight),
+    onResult: (result) => {
+      audio.reelStop()
+      if (result.outcome === 'caught') {
+        audio.fishCaught(result.fish.rarity)
+        if (fishingSpot) spots.deplete(fishingSpot) // the school scatters: the spot is empty until midnight
+      } else if (result.outcome === 'snapped') {
+        audio.lineSnap()
+      }
+    },
+    onClose: () => {
+      fishingSpot = null
+      if (state === 'fishing') setState('playing')
+    },
+  })
+  function startFishing(spot) {
+    fishingSpot = spot
+    audio.fishBite()
+    setState('fishing')
+    fishing.open({ fish: rollFish() })
+  }
   atmosphere.update(clock.timeOfDay, boatState.dir, camera.position.length(), spaceAmount, weather.levels) // correct lighting from the first frame
 
   // --- Game state: start screen -> starting -> playing <-> paused -----------------------------------
@@ -104,6 +140,8 @@ async function main() {
   //   starting  "Set sail" was pressed: the camera swings round to behind the boat
   //   playing   the game
   //   paused    the pause screen
+  //   fishing   the minigame is up: the world runs, the controls are locked
+  //   logbook   the fish logbook is open: like paused, without the pause screen
   // Whenever it is not "playing", the game clock (`sim` below) is 0: the boat, the day and the
   // weather hold still, while the waves, the clouds and the boat's bobbing carry on, so the world
   // still looks alive behind the screens.
@@ -115,6 +153,11 @@ async function main() {
   const interaction = setupInteraction({
     onMenu: () => (state === 'playing' ? setState('paused') : state === 'paused' ? setState('playing') : null),
     onMute: toggleSound,
+    onLogbook: () => {
+      if (state !== 'playing') return
+      setState('logbook')
+      logbook.open()
+    },
     onBlur: () => state === 'playing' && setState('paused'),
   })
   const menu = createMenu({
@@ -147,17 +190,17 @@ async function main() {
     state = next
     cursor.setEnabled(next === 'playing')
     interaction.enabled = next === 'playing'
-    hud.show(next === 'playing' || next === 'paused')
+    hud.show(next === 'playing' || next === 'paused' || next === 'fishing' || next === 'logbook')
     menu.showSound(next === 'menu' || next === 'paused')
     if (next === 'menu') menu.showStart()
     if (next === 'starting') menu.hideStart()
     if (next === 'playing') menu.closePause()
     if (next === 'paused') menu.openPause()
-    audio.setPaused(next === 'paused')
+    audio.setPaused(next === 'paused' || next === 'logbook')
   }
   setState('menu')
 
-  if (import.meta.env.DEV) window.__game = { boatState, boatPose, input: interaction.input, uniforms, lights: { sun, moon, fill }, clock, atmosphere, weather, lightning, dolphins, layout, world, scene, camera, audio, fish, getState: () => state } // for debugging in the console
+  if (import.meta.env.DEV) window.__game = { boatState, boatPose, input: interaction.input, uniforms, lights: { sun, moon, fill }, clock, atmosphere, weather, lightning, dolphins, boat, layout, world, spots, fishing, logbook, startFishing, scene, camera, audio, fish, getState: () => state } // for debugging in the console
 
   // `?fish` checks the fish simulation on the GPU (see src/debug/fishTest.js).
   if (new URLSearchParams(location.search).has('fish')) {
@@ -184,6 +227,8 @@ async function main() {
   let previous = { lights: false, anchored: false, horn: false }
   let bumpCooldown = 0
   let darkHinted = false
+  let lastDay = clock.days // the spots refill when the day changes (midnight)
+  let hintedSpot = null // the fishing spot the player was last told about
 
   renderer.setAnimationLoop((now) => {
     const delta = Math.min((now - last) / 1000, 0.1) // clamp after tab switches
@@ -192,13 +237,14 @@ async function main() {
 
     const { input } = interaction
     const playing = state === 'playing'
-    const sim = playing ? delta : 0 // game time
+    const running = playing || state === 'fishing' // the world carries on while you fish: only the controls are locked
+    const sim = running ? delta : 0 // game time
 
     uniforms.time.value = elapsed // single clock shared with the water shader
     interaction.update(delta)
     weather.update(sim, input.weather) // storm / cover / rain levels; `storm` also drives the waves
 
-    if (playing) {
+    if (running) {
       stepBoat(boatState, input, sim, elapsed) // engine, keel, helm, anchor
       const impact = resolveCollisions(boatState, layout.colliders, sim) // islands and rocks
       bumpCooldown = Math.max(0, bumpCooldown - sim)
@@ -219,8 +265,8 @@ async function main() {
 
     clock.update(sim, input.fastForward)
     spaceAmount += ((input.planetView ? 1 : 0) - spaceAmount) * (1 - Math.exp(-delta * 4))
-    dolphins.update(delta, elapsed, boatState, weather.levels.storm, playing, spaceAmount)
-    lightning.update(delta, weather.levels, playing)
+    dolphins.update(delta, elapsed, boatState, weather.levels.storm, running, spaceAmount)
+    lightning.update(delta, weather.levels, running)
     atmosphere.update(clock.timeOfDay, boatState.dir, camera.position.length(), spaceAmount, weather.levels, lightning.flash) // lights, fog, sky and water colours
     sky.update(camera)
     clouds.update(delta, weather.levels.cover, spaceAmount)
@@ -231,6 +277,11 @@ async function main() {
     if (playing && buoyHit > 0) audio.buoyHit(buoyHit) // the boat sails through it and tips it over
     rain.update(boatState)
     wake.update(sim, boatState)
+    if (clock.days !== lastDay) {
+      lastDay = clock.days
+      spots.refill()
+    }
+    spots.update({ delta, time: elapsed, storm: uniforms.storm.value, space: spaceAmount })
 
     // Sounds and messages for things that just happened, and the continuous sounds.
     if (playing) {
@@ -243,7 +294,16 @@ async function main() {
         hud.toast(input.anchored ? 'Anchor down' : 'Anchor up')
       }
       if (input.horn !== previous.horn) audio.horn(input.horn)
-      audio.update({ speed: boatState.vel.length(), storm: weather.levels.storm, rain: weather.levels.rain, space: spaceAmount })
+
+      // Fishing: say so when a spot with fish comes within reach, and start the fight when the anchor
+      // goes down on one.
+      const biting = input.anchored ? null : spots.nearest(boatState.dir, FISHING.spots.hintRadius)?.spot ?? null
+      if (biting && biting !== hintedSpot) hud.toast(isTouch() ? 'Fish are biting here: tap the anchor' : 'Fish are biting here: drop the anchor (Space)', 3.5)
+      hintedSpot = biting
+      if (input.anchored && !previous.anchored) {
+        const here = spots.nearest(boatState.dir, FISHING.spots.triggerRadius)
+        if (here) startFishing(here.spot)
+      }
 
       const dark = atmosphere.state.elevation < 0.02
       if (dark && !input.lights && !darkHinted) {
@@ -252,6 +312,7 @@ async function main() {
       }
       if (!dark) darkHinted = false
     }
+    if (running) audio.update({ speed: boatState.vel.length(), storm: weather.levels.storm, rain: weather.levels.rain, space: spaceAmount }) // also while fishing
     previous = { lights: input.lights, anchored: input.anchored, horn: input.horn }
 
     hud.update({

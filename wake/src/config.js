@@ -61,6 +61,8 @@ export const WATER = {
 export const BOAT = {
   length: 0.9,
   width: 0.38,
+  // Optional own model (public/models/boat.glb): see scene/boat.js loadBoatModel.
+  model: { file: 'models/boat.glb', fitLength: true, flat: true },
   // How far the whole model is lifted above the waterline. The hull's dark underwater part is
   // 0.12 deep, so at 0.05 a little of it shows above the water. Measured in a full storm over 4 minutes,
   // water washes over the hull's edge: 7% of the time at 0, 0.6% at 0.05 (up to 5 cm, brief spray),
@@ -166,7 +168,7 @@ export const BOAT_LIGHT = {
   angle: 0.5, // half-angle of the beam, radians
   penumbra: 0.6,
   decay: 2,
-  lampPosition: [0, 0.27, -0.33],
+  lampPosition: [0, 0.24, -0.4], // [x sideways, y up, z forward = more negative]
   // Where the beam points to. Tilted ~23 degrees down: the planet is small, so the
   // water curves away fast and a level beam would shoot off into space.
   aim: [0, -1.25, -3.9],
@@ -445,6 +447,50 @@ export const LIGHTHOUSE = {
   beamAngle: 0.2,
   intensity: 260, // candela of the rotating SpotLight at full darkness
   color: '#ffe3a8',
+}
+
+// --- Fishing ---------------------------------------------------------------------
+// The hold-and-release fight (fishing/fishingMinigame.js). Progress and tension both run 0..1:
+// holding the reel fills progress slowly and tension quickly, letting go drains tension.
+export const FISHING = {
+  fight: {
+    progressRate: 0.17, // progress per second while the reel is held (6 s of holding in all)
+    progressSlip: 0.03, // progress lost per second while it is not: the fish swims off with the line
+    tensionRise: 0.5, // tension per second while held (the line snaps after 2 s of holding) ...
+    tensionFall: 0.7, // ... and lost per second when released (1.4 s from snapping to slack)
+    // The fish pulls now and then: `pull` extra tension per second for `duration` s, announced
+    // `warn` s before it starts; `every` = [min, max] seconds between pulls. null = no pulls.
+    thrash: { every: [2.5, 5.5], duration: 0.6, pull: 0.55, warn: 0.5 },
+    danger: 0.8, // tension above this is drawn as danger (the interface only)
+  },
+
+  // Fishing spots: patches of bubbling water. Dropping the anchor within `triggerRadius` of one
+  // starts the fight. Placed by world/layout.js (after everything else, with its own random numbers,
+  // so the rest of the world is exactly what it was without them).
+  spots: {
+    seed: 20261014,
+    count: 6, // in all
+    oceanCount: 2, // this many of them in the big empty ocean (WORLD.ocean)
+    nearStart: { bearing: 38, distance: 0.3 }, // one close to the start, placed like a landmark (degrees from the heading, radians of arc)
+    clearance: 0.9, // from the edge of any island, rock or buoy (world units): room to anchor beside it
+    gap: 1.8, // between two spots
+    startClear: 0.9, // none closer than this to where the boat starts (except the near-start one)
+    triggerRadius: 0.45, // anchor within this distance (over the sea, world units) = the fish bite
+    hintRadius: 2.2, // within this the game says that fish are biting
+    // (a spot that gave up a fish stays empty until the clock passes midnight, see main.js)
+    // The patch of foam the water shader paints at each spot (tsl/spotFoam.js): a disc with rings
+    // lapping outwards. It is what you see from far away and from space.
+    patch: 0.3, // radius, world units
+    patchFoam: 0.7, // how white it is (1 = as foam on a crest)
+    // The bubbles (tsl/fishingBubbles.js): all of them are drawn from one instanced mesh
+    bubbles: 20, // per spot
+    radius: 0.225, // the patch of water they rise in
+    rise: 0.38, // how far above the water they get before they pop
+    size: 0.038, // a bubble's radius at its biggest
+    speed: 0.45, // rises per second (the cycle time of a bubble is about 1 / speed)
+    opacity: 0.45,
+    color: '#a9cfdc',
+  },
 }
 
 // --- Post-processing ---------------------------------------------------------------

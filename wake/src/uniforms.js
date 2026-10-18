@@ -1,6 +1,6 @@
 import { uniform, uniformArray } from 'three/tsl'
 import { Color, Vector3, Vector4 } from 'three/webgpu'
-import { PALETTE, WAKE, CLOUDS, WORLD } from './config.js'
+import { PALETTE, WAKE, CLOUDS, WORLD, FISHING } from './config.js'
 
 const CLOUD_FAIR = CLOUDS.fairColor
 
@@ -46,4 +46,8 @@ export const uniforms = {
   // Islands and rocks the water draws shore foam around: x, y, z = direction from the
   // planet centre, w = shoreline radius (world units); w < 0 = unused slot.
   shoreBodies: uniformArray(Array.from({ length: WORLD.maxBodies }, () => new Vector4(0, 1, 0, -10)), 'vec4'),
+
+  // The fishing spots: x, y, z = direction from the planet centre, w = how full of fish / bubbles it
+  // is (0 = empty). Written by scene/fishingSpots.js; read by the bubbles and by the water's foam patch.
+  fishingSpots: uniformArray(Array.from({ length: FISHING.spots.count }, () => new Vector4(0, 1, 0, 0)), 'vec4'),
 }

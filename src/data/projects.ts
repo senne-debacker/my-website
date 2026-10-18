@@ -19,6 +19,10 @@ export interface Project {
   image: ImageMetadata;
   /** Per-project accent colour used on hover states and the detail page. */
   accent: string;
+  /** Where the portrait card on the home page crops this landscape image (CSS object-position). */
+  cardPosition?: string;
+  /** Darkens the card (0 to 1) when the image is so light that the hero title becomes unreadable. */
+  cardDim?: number;
   /** Figma prototype to embed. Projects without one can show a demo video instead. */
   figma?: string;
   /** Demo video (a path in /public) for projects that cannot run in the browser. */
@@ -47,6 +51,7 @@ export const projects: Project[] = [
     tags: ["Campaign", "UX/UI", "Prototype"],
     image: thrive,
     accent: "#3fc6cf",
+    cardPosition: "17% 50%",
     figma:
       "https://embed.figma.com/proto/M9lBQCMS2c1mXZyvizic27/FINAL?page-id=201%3A17943&node-id=201-17990&viewport=159%2C225%2C0.09&scaling=scale-down&content-scaling=fixed&embed-host=share",
     body: [
@@ -66,6 +71,7 @@ export const projects: Project[] = [
     tags: ["Campaign", "Mobile app", "Development"],
     image: lumen,
     accent: "#ff6a2b",
+    cardPosition: "50% 50%",
     figma:
       "https://embed.figma.com/proto/nBZfMWoxyOufoEYdwfx8gE/K-Town-x-Roffa?node-id=4102-23866&page-id=930%3A507&starting-point-node-id=4102%3A23866&embed-host=share",
     body: [
@@ -85,6 +91,8 @@ export const projects: Project[] = [
     tags: ["Typography", "Grid systems", "Responsive"],
     image: type01,
     accent: "#ff2e1f",
+    cardPosition: "0% 50%",
+    cardDim: 0.38,
     figma:
       "https://embed.figma.com/proto/sC5G85UaOqpK8FpCHFwaIG/TYPE01?node-id=320-26155&viewport=223%2C100%2C0.12&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=320%3A26155&show-proto-sidebar=1&page-id=296%3A4613&embed-host=share",
     body: [
@@ -102,6 +110,8 @@ export const projects: Project[] = [
     tags: ["React Native", "Realtime", "Multiplayer"],
     image: tiltionary,
     accent: "#4285f4",
+    cardPosition: "50% 50%",
+    cardDim: 0.55,
     repo: "https://github.com/senne-debacker/Tiltionary",
     video: {
       src: "/videos/tiltionary-demo.mp4",
@@ -125,6 +135,8 @@ export const projects: Project[] = [
     tags: ["WebGPU", "Three.js", "TSL shaders"],
     image: wake,
     accent: "#e8a36a",
+    cardPosition: "45% 50%",
+    cardDim: 0.6,
     body: [
       "Wake is a small game-like toy: a low-poly water planet with a fishing boat you steer yourself. The sea is drawn on the GPU with a Shadertoy noise shader ported to TSL, and the boat floats on exactly the same waves. It has a day and night cycle, storms with rain and lightning, a lighthouse, islands and a foam wake that follows your path.",
       "Best in a recent Chrome or Edge, since it needs WebGPU.",

@@ -920,3 +920,552 @@ body.touch #right {
   top: max(14px, env(safe-area-inset-top));
   right: env(safe-area-inset-right);
 }
+
+/* ---------------------------------------------------------------------------------------------
+   Fishing minigame and logbook (src/fishing/). Both reuse the menu card and the big button.
+   --------------------------------------------------------------------------------------------- */
+
+/* While the fish fights, a panel sits high up in the (mostly empty) sky, under the day dial, so the
+   boat and the bubbling water stay in view; the result is a card in the middle over a blur, like
+   the pause screen. Between the HUD and the menus (z 20). */
+#fishing {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: calc(104px * var(--ui, 1));
+  box-sizing: border-box;
+  pointer-events: none;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+#fishing.show {
+  display: flex;
+}
+
+#fishing.result {
+  align-items: center;
+  padding-top: 0;
+  pointer-events: auto;
+  background: radial-gradient(ellipse at 50% 45%, rgba(9, 22, 34, 0.18), rgba(3, 7, 11, 0.62));
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.fishing-card {
+  display: none;
+  width: min(540px, 92vw);
+  padding: 22px 32px 16px;
+  pointer-events: auto;
+  transform-origin: 50% 0;
+}
+
+#fishing.result .fishing-card {
+  transform-origin: 50% 50%;
+  text-align: center;
+}
+
+.fishing-card.show {
+  display: block;
+}
+
+.fishing-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.fishing-card h2 {
+  margin: 2px 0 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: 0.12em;
+}
+
+.fishing-kicker {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.5em;
+  color: var(--teal-light);
+}
+
+/* The hooked fish tilts as the line tightens, twitches before a pull and thrashes during it. */
+#fishing-fish {
+  flex: none;
+  width: 84px;
+  height: 42px;
+  overflow: visible;
+  color: var(--teal-light);
+  transform: rotate(calc(var(--tension, 0) * -14deg));
+  transition: transform 0.1s linear, color 0.2s;
+}
+
+.fishing-card.warning #fishing-fish {
+  color: var(--warn);
+  animation: fish-twitch 0.14s linear infinite;
+}
+
+.fishing-card.pulling #fishing-fish {
+  color: var(--bad);
+  animation: fish-thrash 0.07s linear infinite;
+}
+
+@keyframes fish-twitch {
+  50% {
+    translate: 2px 0;
+  }
+}
+
+@keyframes fish-thrash {
+  25% {
+    translate: -4px 2px;
+  }
+  75% {
+    translate: 4px -2px;
+  }
+}
+
+/* The two bars: progress (green) and tension (red, with the danger zone hatched). */
+.meter {
+  display: grid;
+  grid-template-columns: 104px 1fr 54px;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.meter-label {
+  font-size: 15px;
+  letter-spacing: 0.28em;
+  color: rgba(241, 236, 224, 0.88);
+}
+
+.meter-track {
+  position: relative;
+  height: 20px;
+  overflow: hidden;
+  background: rgba(241, 236, 224, 0.07);
+  border: 1px solid rgba(241, 236, 224, 0.38);
+}
+
+.meter-fill {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+#meter-progress .meter-fill {
+  background: linear-gradient(90deg, #3d9a49, var(--good));
+}
+
+#meter-tension .meter-fill {
+  background: linear-gradient(90deg, #b3402f, var(--bad));
+}
+
+.meter-danger {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--danger, 0.8) * 100%);
+  right: 0;
+  text-decoration: none;
+  border-left: 2px solid rgba(241, 236, 224, 0.75);
+  background: repeating-linear-gradient(135deg, rgba(229, 96, 77, 0.3) 0 5px, transparent 5px 10px);
+}
+
+.meter.danger .meter-fill {
+  animation: meter-flash 0.3s steps(2, jump-none) infinite;
+}
+
+@keyframes meter-flash {
+  50% {
+    filter: brightness(1.55);
+  }
+}
+
+.meter-value {
+  text-align: right;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The reel button: held with Space, the mouse or a thumb. */
+.big-button.reel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 20px;
+  padding: 14px 20px;
+  font-size: 20px;
+  letter-spacing: 0.3em;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.reel kbd {
+  margin: 0;
+}
+
+.big-button.reel.held {
+  background: var(--teal);
+  color: #fff;
+  box-shadow: 0 0 26px rgba(127, 214, 230, 0.55);
+  transform: translateY(1px);
+}
+
+.fishing-hint {
+  margin: 12px 0 0;
+  min-height: 1.2em;
+  text-align: center;
+  font-size: 14px;
+  letter-spacing: 0.22em;
+  color: rgba(241, 236, 224, 0.75);
+}
+
+.text-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px auto 0;
+  padding: 6px 10px;
+  font: 700 12px var(--font);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(241, 236, 224, 0.55);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.text-button:hover,
+.text-button:focus-visible {
+  outline: none;
+  color: var(--cream);
+}
+
+.text-button kbd {
+  height: 20px;
+  min-width: 20px;
+  margin: 0;
+  font-size: 11px;
+}
+
+/* The result card. */
+.result-image {
+  width: min(260px, 62%);
+  margin: 12px auto 0;
+  filter: drop-shadow(0 0 16px var(--rarity, transparent));
+}
+
+.result-image svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+#result-name {
+  margin: 8px 0 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-size: 30px;
+  letter-spacing: 0.1em;
+}
+
+.result-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 10px 0 0;
+}
+
+.result-meta b {
+  font-size: 24px;
+  letter-spacing: 0.08em;
+}
+
+.rarity-chip {
+  display: inline-block;
+  margin: 0;
+  padding: 3px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: #0b0f14;
+  background: var(--rarity, var(--cream));
+}
+
+.result-text {
+  margin: 12px auto 0;
+  max-width: 420px;
+  font-size: 16px;
+  line-height: 1.45;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  color: rgba(241, 236, 224, 0.9);
+}
+
+.result-badges {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 12px 0 0;
+}
+
+.result-badges span {
+  padding: 2px 10px;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  color: var(--warn);
+  border: 1px solid rgba(240, 179, 74, 0.7);
+}
+
+.result-badges span[hidden] {
+  display: none;
+}
+
+.result-snap {
+  margin: 14px 0 0;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  color: rgba(241, 236, 224, 0.85);
+}
+
+#fishing-result.snapped h2 {
+  color: var(--bad);
+}
+
+#fishing-result.snapped .result-caught,
+#fishing-result.caught .result-snap {
+  display: none;
+}
+
+#fishing-result .big-button {
+  margin-top: 20px;
+}
+
+/* Touch: the card is not scaled below 0.7 (the menu scale gets to 0.55 on a phone held sideways) and
+   the reel button is tall: it is what the thumb holds. */
+body.touch .fishing-card {
+  transform: scale(max(var(--menu-scale, 1), 0.7));
+}
+
+body.touch .big-button.reel {
+  min-height: 66px;
+}
+
+/* The toasts ("Anchor down") would show through the card. */
+body.fishing-open #toast {
+  opacity: 0;
+}
+
+/* Touch: the pads are in the way, and the key hints mean nothing. */
+body.fishing-open #touch,
+body.touch .reel kbd,
+body.touch .text-button kbd {
+  display: none;
+}
+
+/* The logbook: a card like the pause screen, a grid of tiles by rarity and a detail panel. */
+#logbook {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 50% 45%, rgba(9, 22, 34, 0.18), rgba(3, 7, 11, 0.62));
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  text-transform: uppercase;
+}
+
+#logbook.show {
+  display: flex;
+}
+
+.logbook-card {
+  display: flex;
+  flex-direction: column;
+  width: min(960px, 92vw);
+  max-height: calc(92vh / var(--menu-scale, 1));
+  padding: 20px 34px 12px;
+}
+
+.logbook-card h1 {
+  font-size: clamp(30px, 5vw, 44px);
+}
+
+/* Only the grid scrolls (when the window is short); the detail panel stays where it is. */
+.logbook-body {
+  display: grid;
+  grid-template-columns: 1fr 236px;
+  gap: 24px;
+  min-height: 0;
+  margin-top: 8px;
+}
+
+#logbook-grid {
+  min-height: 0;
+  padding-right: 6px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(127, 214, 230, 0.45) transparent;
+}
+
+#logbook-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+#logbook-grid::-webkit-scrollbar-thumb {
+  background: rgba(127, 214, 230, 0.45);
+}
+
+.logbook-group h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 8px 0 6px;
+  padding-bottom: 4px;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  color: var(--rarity);
+  border-bottom: 1px solid rgba(241, 236, 224, 0.2);
+}
+
+.logbook-group small {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+.logbook-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px 5px;
+  font: 700 11px var(--font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: linear-gradient(180deg, #1d3347, #152433);
+  border: 1px solid rgba(241, 236, 224, 0.18);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.tile:hover,
+.tile:focus-visible,
+.tile.selected {
+  outline: none;
+  border-color: var(--rarity);
+}
+
+.tile.selected {
+  box-shadow: 0 0 0 1px var(--rarity);
+}
+
+.tile-image {
+  width: 100%;
+}
+
+.tile-image svg,
+#detail-image svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tile.locked .tile-image svg,
+#detail-image.locked svg {
+  filter: brightness(0) opacity(0.5);
+}
+
+.tile.locked .tile-name {
+  color: rgba(241, 236, 224, 0.45);
+}
+
+#logbook-detail {
+  align-self: start;
+  padding-left: 24px;
+  text-align: center;
+  border-left: 1px solid rgba(127, 214, 230, 0.2);
+}
+
+#detail-image {
+  padding: 10px;
+  background: linear-gradient(180deg, #1d3347, #152433);
+  border: 1px solid var(--rarity);
+}
+
+#detail-name {
+  margin: 12px 0 8px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: 0.08em;
+}
+
+#detail-stats {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0.14em;
+  color: rgba(241, 236, 224, 0.75);
+}
+
+#detail-text {
+  margin: 10px 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  color: rgba(241, 236, 224, 0.9);
+}
+
+#logbook .big-button {
+  margin-top: 12px;
+  padding-block: 10px;
+}
+
+#logbook .menu-foot {
+  margin-top: 8px;
+}
+
+@media (max-width: 760px) {
+  .logbook-body {
+    grid-template-columns: 1fr;
+  }
+  #logbook-detail {
+    padding: 14px 0 0;
+    border-left: 0;
+    border-top: 1px solid rgba(127, 214, 230, 0.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing-card.warning #fishing-fish,
+  .fishing-card.pulling #fishing-fish,
+  .meter.danger .meter-fill {
+    animation: none;
+  }
+}

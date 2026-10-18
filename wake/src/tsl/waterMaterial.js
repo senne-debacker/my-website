@@ -1,11 +1,12 @@
 import { MeshStandardNodeMaterial } from 'three/webgpu'
 import { float, vec3, color, positionLocal, positionView, smoothstep, mix, vertexStage } from 'three/tsl'
-import { PLANET, WATER, WAKE, BOAT_LIGHT, FISH } from '../config.js'
+import { PLANET, WATER, WAKE, BOAT_LIGHT, FISH, FISHING } from '../config.js'
 import { Color } from 'three/webgpu'
 import { uniforms } from '../uniforms.js'
 import { waveNoise, waveAmplitude } from './waves.js'
 import { wakeFoam } from './wake.js'
 import { shoreFoam } from './shore.js'
+import { spotFoam } from './spotFoam.js'
 import { simplex3d } from './simplexNoise.js'
 import { lampPool } from './lampPool.js'
 import { rainHeight, surfaceBump } from './raindrops.js'
@@ -33,16 +34,18 @@ export function createWaterMaterial(fish) {
   // which gives the faceted low-poly look.
   const n = vertexStage(noise)
   const shore = vertexStage(shoreFoam(dir)) // surf around islands and rocks, see tsl/shore.js
+  const spots = vertexStage(spotFoam(dir)) // the patches of foam over the fishing spots, see tsl/spotFoam.js
   if (WATER.flatColor) {
     n.setInterpolation('flat')
     shore.setInterpolation('flat')
+    spots.setInterpolation('flat')
   }
 
   const slope = smoothstep(float(-0.4), float(0.5), n) // 0 in troughs -> 1 near crests
   const body = mix(uniforms.deepColor, uniforms.shallowColor, slope)
 
   const foamLevel = mix(float(WATER.foamThreshold), float(WATER.stormFoamThreshold), uniforms.storm)
-  const waveFoam = smoothstep(foamLevel, foamLevel.add(0.1), n).max(shore.mul(0.7)) // crests and shores
+  const waveFoam = smoothstep(foamLevel, foamLevel.add(0.1), n).max(shore.mul(0.7)).max(spots.mul(FISHING.spots.patchFoam)) // crests, shores and fishing spots
 
   // --- The boat's wake: it must stand out from the wave foam -------------------------------------
   // The wake value comes per vertex but is NOT flat: it is interpolated smoothly across each

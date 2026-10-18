@@ -23,7 +23,7 @@ const USE_GENERATED_MUSIC = false
 // The sea and hull-wash layers are switched off (the music already has water in it). The code is
 // kept: set to true to hear them again.
 const USE_WATER_SOUND = false
-const THUNDER_VOLUME = 0.35 // the looped recording at the height of a storm (1 = full scale), kept low on purpose
+const THUNDER_VOLUME = 0.8 // the looped recording at the height of a storm (1 = full scale), kept low on purpose
 const clamp = (x, min = 0, max = 1) => Math.min(max, Math.max(min, x))
 const smoothstep = (a, b, x) => {
   const t = clamp((x - a) / (b - a))
@@ -52,6 +52,7 @@ export function createAudio() {
   let paused = false
   let music = null
   let hornVoice = null
+  const reelState = { last: 0, clickIn: 0, creakIn: 0, warning: false, pulling: false } // the fishing reel sounds
   const bus = {} // named gain nodes
   const layer = {} // the continuous layers
   const meters = {} // analysers, for the debug read-out
@@ -431,6 +432,84 @@ export function createAudio() {
       }
       noiseBurst({ duration: 0.08, frequency: 2600, Q: 2, volume: 0.25 * s })
       tone({ duration: 0.16, frequency: 130, endFrequency: 60, volume: 0.45 * s })
+    },
+
+    // The fish take the bait: a few bubbles popping upwards.
+    fishBite() {
+      if (!ctx) return
+      for (let i = 0; i < 4; i++) {
+        const when = i * 0.09 + Math.random() * 0.03
+        const pitch = 380 + Math.random() * 260
+        tone({ when, duration: 0.09, frequency: pitch, endFrequency: pitch * 2.2, volume: 0.16 })
+        noiseBurst({ when, duration: 0.05, frequency: 1800, Q: 2, volume: 0.05 })
+      }
+    },
+
+    // The line snaps: a sharp crack, a falling whine and a dull thud.
+    lineSnap() {
+      if (!ctx) return
+      reelState.clickIn = 0
+      noiseBurst({ duration: 0.09, type: 'highpass', frequency: 3200, Q: 0.7, volume: 0.6 })
+      tone({ duration: 0.3, type: 'triangle', frequency: 1500, endFrequency: 220, volume: 0.25 })
+      tone({ when: 0.03, duration: 0.25, frequency: 140, endFrequency: 50, volume: 0.6 })
+    },
+
+    // The fight, called every frame while it lasts: the reel's ratchet clicks faster as the tension
+    // rises, the line creaks when it is nearly at breaking point, a bubble pop warns of a pull and a
+    // heavy thump comes with it.
+    reel({ holding, tension, pulling, warning }) {
+      if (!ctx) return
+      const now = ctx.currentTime
+      const dt = Math.min(0.1, now - (reelState.last || now))
+      reelState.last = now
+      if (holding) {
+        reelState.clickIn -= dt
+        if (reelState.clickIn <= 0) {
+          reelState.clickIn = 0.12 - 0.07 * tension
+          noiseBurst({ duration: 0.035, frequency: 2400 + Math.random() * 700, Q: 3, volume: 0.35 })
+          tone({ duration: 0.07, frequency: 190, endFrequency: 110, volume: 0.3 })
+          tone({ when: 0.02, duration: 0.04, type: 'triangle', frequency: 1400 + tension * 900, volume: 0.07 })
+        }
+        reelState.creakIn -= dt
+        if (tension > 0.75 && reelState.creakIn <= 0) {
+          reelState.creakIn = 0.3
+          tone({ duration: 0.28, type: 'sawtooth', frequency: 420 + tension * 380, endFrequency: 360 + tension * 420, volume: 0.045 * (tension - 0.5) * 2 })
+        }
+      }
+      if (warning && !reelState.warning) {
+        for (let i = 0; i < 2; i++) tone({ when: i * 0.08, duration: 0.09, frequency: 420, endFrequency: 900, volume: 0.2 })
+      }
+      if (pulling && !reelState.pulling) {
+        tone({ duration: 0.3, frequency: 100, endFrequency: 40, volume: 0.7 })
+        noiseBurst({ duration: 0.4, type: 'lowpass', frequency: 1500, endFrequency: 250, Q: 0.7, volume: 0.4, attack: 0.02 })
+      }
+      reelState.warning = warning
+      reelState.pulling = pulling
+    },
+
+    // The fight is over (the reel falls silent).
+    reelStop() {
+      reelState.last = 0
+      reelState.clickIn = 0
+      reelState.creakIn = 0
+      reelState.warning = reelState.pulling = false
+    },
+
+    // A fish is landed: a big splash, a thump of it hitting the deck and a run up the key of the music
+    // (D F A C D), one more note for every rarity, so a legendary catch sounds like one. Loud on purpose.
+    fishCaught(rarity = 'common') {
+      if (!ctx) return
+      const count = { common: 2, uncommon: 3, rare: 4, legendary: 5 }[rarity] ?? 2
+      noiseBurst({ duration: 0.7, type: 'lowpass', frequency: 2200, endFrequency: 300, Q: 0.7, volume: 0.7, attack: 0.03 })
+      noiseBurst({ when: 0.05, duration: 0.3, type: 'bandpass', frequency: 1800, Q: 0.8, volume: 0.25 })
+      tone({ when: 0.2, duration: 0.15, frequency: 130, endFrequency: 60, volume: 0.6 }) // lands on the deck
+      ;[587, 698, 880, 1047, 1175].slice(0, count).forEach((frequency, i) => {
+        tone({ when: 0.3 + i * 0.11, duration: 0.7, type: 'triangle', frequency, volume: 0.32 })
+        tone({ when: 0.3 + i * 0.11, duration: 0.5, frequency: frequency * 2, volume: 0.08 })
+      })
+      if (rarity === 'rare' || rarity === 'legendary') {
+        tone({ when: 0.3 + count * 0.11, duration: 1.6, type: 'sine', frequency: 293.7, volume: 0.25, attack: 0.05 })
+      }
     },
 
     // Hitting a shore: a hull-shaking boom, a sharp crack of splintering timber and a creak, louder

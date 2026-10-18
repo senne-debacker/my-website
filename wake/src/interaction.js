@@ -15,7 +15,8 @@ const RIGHT = ['KeyD', 'ArrowRight']
 //   fastForward bool  hold T to speed up the day/night clock
 //   boost     bool    Shift, true while held
 //   weather   'auto' | 'calm' | 'breezy' | 'storm'   keys 4 / 1 / 2 / 3, read by world/weather.js
-// App-level keys call back into main.js: Escape -> handlers.onMenu(), M -> handlers.onMute().
+// App-level keys call back into main.js: Escape -> handlers.onMenu(), M -> handlers.onMute(),
+// B -> handlers.onLogbook() (the fish logbook; only while sailing).
 // While `interaction.enabled` is false (start screen, pause) only Escape works and the input
 // settles to neutral.
 export function setupInteraction(handlers = {}) {
@@ -50,6 +51,7 @@ export function setupInteraction(handlers = {}) {
     if (key === 'KeyL') input.lights = !input.lights
     if (key === 'KeyH') input.horn = true
     if (key === 'KeyC') input.planetView = !input.planetView
+    if (key === 'KeyB') handlers.onLogbook?.()
   }
   function release(key, code = key) {
     down.delete(code)

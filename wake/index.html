@@ -26,6 +26,7 @@
       <symbol id="i-right" viewBox="0 0 24 24"><path d="M9.5 5.5L16 12l-6.5 6.5" /></symbol>
       <symbol id="i-up" viewBox="0 0 24 24"><path d="M5.5 14.5L12 8l6.5 6.5" /></symbol>
       <symbol id="i-down" viewBox="0 0 24 24"><path d="M5.5 9.5L12 16l6.5-6.5" /></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13" /></symbol>
       <symbol id="i-muted" viewBox="0 0 24 24"><path d="M4 9.5v5h4l5 4v-13l-5 4H4z" /><path d="M16 9.5l5 5M21 9.5l-5 5" /></symbol>
     </svg>
 
@@ -67,6 +68,7 @@
           <div class="tool" id="tool-lamp" data-key="KeyL"><div class="diamond"><svg class="icon"><use href="#i-bulb" /></svg></div><span class="key">L</span></div>
           <div class="tool" id="tool-anchor" data-key="Space"><div class="diamond"><svg class="icon"><use href="#i-anchor" /></svg></div><span class="key wide">Space</span></div>
           <div class="tool" id="tool-horn" data-key="KeyH" data-hold><div class="diamond"><svg class="icon"><use href="#i-horn" /></svg></div><span class="key">H</span></div>
+          <div class="tool" id="tool-book" data-key="KeyB"><div class="diamond"><svg class="icon"><use href="#i-book" /></svg></div><span class="key">B</span></div>
           <div id="stats">
             <div class="stat"><svg class="icon"><use href="#i-gauge" /></svg><b id="stat-speed">0</b><small>kn</small></div>
             <div class="stat"><svg class="icon"><use href="#i-waves" /></svg><b id="stat-sea" class="good">Calm</b></div>
@@ -123,7 +125,7 @@
           <p class="menu-state">Paused</p>
         </header>
 
-        <p class="touch-help">Left thumb: steer. Right thumb: forward and back, and the gauge button for boost. Lamp, anchor and horn are the diamonds at the top left. Drag the sea to look round the boat, pinch to zoom, and the top-right buttons pause and mute.</p>
+        <p class="touch-help">Left thumb: steer. Right thumb: forward and back, and the gauge button for boost. Lamp, anchor, horn and the fish logbook are the diamonds at the top left; drop the anchor over bubbling water to fish. Drag the sea to look round the boat, pinch to zoom, and the top-right buttons pause and mute.</p>
 
         <div class="menu-columns">
           <section>
@@ -131,10 +133,11 @@
             <dl>
               <div><dt><kbd>W</kbd><kbd>S</kbd></dt><dd>Throttle / reverse</dd></div>
               <div><dt><kbd>A</kbd><kbd>D</kbd></dt><dd>Steer (you need speed)</dd></div>
-              <div><dt><kbd class="wide">Space</kbd></dt><dd>Drop / raise the anchor</dd></div>
+              <div><dt><kbd class="wide">Space</kbd></dt><dd>Drop / raise the anchor (and fish at the bubbles)</dd></div>
               <div><dt><kbd class="wide">Shift</kbd></dt><dd>Boost (8 knots)</dd></div>
               <div><dt><kbd>H</kbd></dt><dd>Horn (hold it)</dd></div>
               <div><dt><kbd>L</kbd></dt><dd>Bow lamp</dd></div>
+              <div><dt><kbd>B</kbd></dt><dd>Fish logbook</dd></div>
               <div><dt><kbd>C</kbd></dt><dd>Chase camera / planet view</dd></div>
             </dl>
           </section>
@@ -157,6 +160,79 @@
 
         <button id="menu-action" class="big-button" type="button">Resume</button>
         <p class="menu-foot">Drag looks round the boat (it swings back by itself) &middot; Wheel zooms &middot; Enter also works</p>
+      </div>
+    </div>
+
+    <!-- Fishing minigame (src/fishing/fishingMinigame.js): a panel at the bottom while the fish fights,
+         a card in the middle with the result afterwards. -->
+    <div id="fishing" aria-live="polite">
+      <div id="fishing-fight" class="menu-card fishing-card">
+        <div class="fishing-head">
+          <div>
+            <p class="fishing-kicker">Fishing</p>
+            <h2>Something is biting</h2>
+          </div>
+          <svg id="fishing-fish" viewBox="0 0 120 60" aria-hidden="true">
+            <path d="M109 29 Q117 14 114 0" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.6" />
+            <g fill="currentColor">
+              <polygon points="108,30 92,16 66,12 40,20 26,30 40,40 66,48 92,44" />
+              <polygon points="30,30 8,14 14,30 8,46" />
+              <polygon points="62,13 70,4 80,14" />
+            </g>
+            <circle cx="94" cy="27" r="2.6" fill="#0b0f14" />
+          </svg>
+        </div>
+
+        <div class="meter" id="meter-progress" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <span class="meter-label">Progress</span>
+          <div class="meter-track"><i class="meter-fill"></i></div>
+          <b class="meter-value">0%</b>
+        </div>
+        <div class="meter" id="meter-tension" role="progressbar" aria-label="Tension" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <span class="meter-label">Tension</span>
+          <div class="meter-track"><i class="meter-fill"></i><u class="meter-danger"></u></div>
+          <b class="meter-value">0%</b>
+        </div>
+
+        <button id="fishing-reel" class="big-button reel" type="button"><kbd class="wide">Space</kbd><span>Hold to reel</span></button>
+        <p id="fishing-hint" class="fishing-hint">Hold to reel in</p>
+        <button id="fishing-release" class="text-button" type="button"><kbd>Esc</kbd><span>Let it go</span></button>
+      </div>
+
+      <div id="fishing-result" class="menu-card fishing-card">
+        <p class="fishing-kicker">Fishing</p>
+        <h2 id="result-title">Caught!</h2>
+        <div class="result-caught">
+          <div id="result-image" class="result-image"></div>
+          <h3 id="result-name"></h3>
+          <p class="result-meta"><span id="result-rarity" class="rarity-chip"></span><b id="result-weight"></b></p>
+          <p id="result-text" class="result-text"></p>
+          <p class="result-badges"><span id="result-new" hidden>New species</span><span id="result-record" hidden>Personal best</span></p>
+        </div>
+        <p class="result-snap">It got away. Let go before the line gets too tight.</p>
+        <button id="fishing-continue" class="big-button" type="button">Continue</button>
+      </div>
+    </div>
+
+    <!-- Fish logbook (src/fishing/logbook.js): every species, a silhouette until it has been caught. -->
+    <div id="logbook">
+      <div class="menu-card logbook-card">
+        <header>
+          <h1>Logbook</h1>
+          <p class="menu-state" id="logbook-count">0 / 16 species</p>
+        </header>
+        <div class="logbook-body">
+          <div id="logbook-grid"></div>
+          <aside id="logbook-detail">
+            <div id="detail-image"></div>
+            <h2 id="detail-name">???</h2>
+            <p id="detail-rarity" class="rarity-chip"></p>
+            <p id="detail-stats"></p>
+            <p id="detail-text"></p>
+          </aside>
+        </div>
+        <button id="logbook-close" class="big-button" type="button">Close</button>
+        <p class="menu-foot">B or Esc closes the book</p>
       </div>
     </div>
 
