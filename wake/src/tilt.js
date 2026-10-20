@@ -166,7 +166,7 @@ export function setupTilt(interaction, { notify = () => {} } = {}) {
       value += (target - value) * (1 - Math.exp(-delta * TILT.response))
     }
     tilt.value = value
-    stickElement?.style.setProperty('--steer', value.toFixed(3)) // the chevrons show the helm
+    stickElement?.style.setProperty('--steer', value.toFixed(3)) // (the CSS can read the helm)
   }
 
   refresh()

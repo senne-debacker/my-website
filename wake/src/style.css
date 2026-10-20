@@ -94,25 +94,27 @@ body {
 
 #dial-anchor {
   position: absolute;
-  left: -17px;
-  top: 67px;
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  box-sizing: border-box;
-  border-radius: 50%;
-  background: var(--ink);
-  border: 2px solid rgba(241, 236, 224, 0.45);
-  color: rgba(241, 236, 224, 0.5);
-  font-size: 20px;
-  transition: all 0.25s;
+  left: -9px;
+  top: 61px;
+  width: 18px;
+  height: 22px;
+  filter: drop-shadow(0 0 1.5px #04070a) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  transition: filter 0.25s;
 }
 
+#dial-anchor svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: #e5483a;
+  stroke: #04070a;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+/* the red arrow glows while the anchor is down */
 #dial-anchor.down {
-  color: #fff;
-  border-color: var(--teal-light);
-  box-shadow: 0 0 14px rgba(127, 214, 230, 0.7);
+  filter: drop-shadow(0 0 1.5px #04070a) drop-shadow(0 0 8px rgba(255, 106, 88, 0.95));
 }
 
 #dial-pill {
@@ -146,24 +148,26 @@ body {
   position: absolute;
   left: 100px;
   top: 4px;
-  width: 60px;
-  height: 60px;
+  width: 66px;
+  height: 66px;
 }
 
 #compass-dial {
   width: 100%;
   height: 100%;
   overflow: visible;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
-/* The bow marker stays at the top while the dial turns underneath it. */
+/* The bow marker stays at the top while the card turns underneath it. */
 #compass-bow {
   position: absolute;
-  top: -8px;
+  top: -9px;
   left: 50%;
   margin-left: -5px;
   border: 5px solid transparent;
   border-top: 8px solid var(--cream);
+  filter: drop-shadow(0 0 1px #04070a);
 }
 
 #toast {
@@ -884,10 +888,11 @@ body.touch {
 /* The joystick: a dark disc with the four directions, and a diamond knob in the style of the tool
    buttons. Up / down is the throttle, left / right the helm (touch.js). */
 #stick {
+  --stick-size: clamp(112px, 30vmin, 168px);
   position: absolute;
   left: max(14px, env(safe-area-inset-left));
   bottom: max(14px, env(safe-area-inset-bottom));
-  width: clamp(112px, 30vmin, 168px);
+  width: var(--stick-size);
   aspect-ratio: 1;
   pointer-events: auto;
   touch-action: none;
@@ -955,7 +960,7 @@ body.touch {
   position: absolute;
   right: max(8px, env(safe-area-inset-right));
   bottom: max(8px, env(safe-area-inset-bottom));
-  width: 292px;
+  width: 196px;
   height: 190px;
   transform: scale(var(--ui));
   transform-origin: 100% 100%;
@@ -983,8 +988,6 @@ body.touch {
 #actions #touch-boost { --s: 100px; --x: 118px; --y: 0px; }
 #actions #t-lamp { --s: 68px; --x: 16px; --y: 120px; }
 #actions #t-horn { --x: 96px; --y: 124px; }
-#actions #t-camera { --x: 164px; --y: 124px; }
-#actions #t-book { --x: 232px; --y: 124px; }
 
 .tool.active .diamond {
   border-color: var(--teal-light);
@@ -1522,6 +1525,7 @@ body.fishing-open #toast {
 /* Touch: the pads are in the way, and the key hints mean nothing. */
 body.fishing-open #stick,
 body.fishing-open #actions,
+body.fishing-open #top-tools,
 body.touch .reel kbd,
 body.touch .text-button kbd {
   display: none;
@@ -2007,13 +2011,215 @@ body.touch #menu .ctrl-mode {
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
 }
 
-/* With tilt steering the stick is a throttle lever: the knob only slides up and down, and the
-   left / right chevrons show the helm instead (--steer -1..1, written by tilt.js). */
-body.tilt-steer #stick .s-left {
-  opacity: calc(0.35 + 0.65 * max(0, -1 * var(--steer, 0)));
-  color: var(--teal-light);
+/* With tilt steering the stick only does the throttle (up / down), so it is a slim vertical lever
+   instead of a disc: no left / right, and the knob slides along the track (touch.js). */
+body.tilt-steer #stick {
+  display: flex;
+  justify-content: center;
 }
+
+body.tilt-steer #stick .stick-base {
+  width: calc(var(--stick-size) * 0.46);
+  border-radius: calc(var(--stick-size) * 0.23);
+}
+
+body.tilt-steer #stick .stick-base .icon {
+  width: calc(var(--stick-size) * 0.15);
+  height: calc(var(--stick-size) * 0.15);
+}
+
+body.tilt-steer #stick .s-up {
+  left: calc(50% - var(--stick-size) * 0.075);
+  top: calc(var(--stick-size) * 0.07);
+}
+
+body.tilt-steer #stick .s-down {
+  left: calc(50% - var(--stick-size) * 0.075);
+  bottom: calc(var(--stick-size) * 0.07);
+}
+
+body.tilt-steer #stick .s-left,
 body.tilt-steer #stick .s-right {
-  opacity: calc(0.35 + 0.65 * max(0, var(--steer, 0)));
-  color: var(--teal-light);
+  display: none;
+}
+
+body.tilt-steer #stick .stick-knob {
+  width: calc(var(--stick-size) * 0.3);
+  height: calc(var(--stick-size) * 0.3);
+  margin: calc(var(--stick-size) * -0.15) 0 0 calc(var(--stick-size) * -0.15);
+}
+
+/* The pause screen on a phone held sideways: the screen is short, so the card is two columns (the
+   controls on the left, the settings and Resume on the right) and nothing needs scrolling. The
+   Sound button shrinks to its icon so it does not sit on the card. */
+@media (orientation: landscape) and (max-height: 520px) {
+  body.touch #menu {
+    align-items: center;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  body.touch #menu .menu-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-areas:
+      'head ctrl'
+      'touch audio'
+      'touch action';
+    gap: 8px 22px;
+    align-items: center;
+    width: min(760px, calc(100vw - 112px));
+    margin: 0;
+    padding: 12px 18px;
+  }
+
+  body.touch #menu .menu-card header {
+    grid-area: head;
+  }
+
+  body.touch #menu .menu-card h1 {
+    margin: 0;
+    font-size: clamp(26px, 9vh, 36px);
+  }
+
+  body.touch #menu .menu-state {
+    margin: 2px 0 0;
+    font-size: 12px;
+    letter-spacing: 0.4em;
+  }
+
+  body.touch #menu .touchmap {
+    grid-area: touch;
+    gap: 6px 14px;
+    margin: 0;
+  }
+
+  body.touch #menu .stick-base.mini {
+    width: clamp(56px, 20vh, 74px);
+    height: clamp(56px, 20vh, 74px);
+  }
+
+  .tm-stick p {
+    display: none;
+  }
+
+  .mini-tool {
+    font-size: 10px;
+  }
+
+  .mini-tool .diamond {
+    width: clamp(24px, 8.5vh, 32px);
+    height: clamp(24px, 8.5vh, 32px);
+    margin: 6px 0 7px;
+  }
+
+  .mini-tool .diamond .icon {
+    width: 15px;
+    height: 15px;
+  }
+
+  .tm-note {
+    margin: 0;
+    font-size: 10px;
+    line-height: 1.35;
+    letter-spacing: 0.08em;
+  }
+
+  body.touch #menu .ctrl-mode {
+    grid-area: ctrl;
+    margin: 0;
+    padding: 0;
+    border-top: 0;
+    gap: 6px 8px;
+    font-size: 11px;
+  }
+
+  body.touch #menu .ctrl-mode button {
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .ctrl-note {
+    min-height: 0;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+
+  .ctrl-note:empty {
+    display: none;
+  }
+
+  body.touch #menu .menu-audio {
+    grid-area: audio;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    border-top: 0;
+    font-size: 12px;
+  }
+
+  body.touch #menu .menu-audio label {
+    justify-content: space-between;
+  }
+
+  body.touch #menu .menu-audio input {
+    width: min(150px, 42%);
+  }
+
+  body.touch #menu .big-button {
+    grid-area: action;
+    margin: 0;
+    padding: 9px 28px;
+    font-size: 17px;
+  }
+
+  body.touch #sound-button {
+    top: 8px;
+    right: max(8px, env(safe-area-inset-right));
+    padding: 7px;
+  }
+
+  body.touch #sound-button-label {
+    display: none;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) and (max-width: 640px) {
+  body.touch #menu .ctrl-label {
+    display: none; /* the two buttons then sit side by side */
+  }
+}
+
+/* Phone: the camera and the logbook sit at the top right under the menu button (they are not used
+   while steering), and there is no mute button in the game (the pause screen has one). */
+body.touch #strip-sound {
+  display: none;
+}
+
+#top-tools {
+  position: absolute;
+  top: calc(max(14px, env(safe-area-inset-top)) + 46px * var(--ui));
+  right: max(10px, env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* the diamonds are 1.1 x their box on the diagonal */
+  transform: scale(var(--ui));
+  transform-origin: 100% 0;
+}
+
+#top-tools .tool {
+  width: 56px;
+  height: 56px;
+}
+
+#top-tools .diamond {
+  inset: 6px;
+}
+
+#top-tools .diamond .icon {
+  width: 22px;
+  height: 22px;
 }

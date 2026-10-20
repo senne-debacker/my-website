@@ -39,6 +39,7 @@ const arc = (t0, t1) => {
   return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${RING} ${RING} 0 ${t1 - t0 > 0.5 ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`
 }
 
+const COMPASS_LETTERS = [['compass-n', 0, -15], ['compass-e', 15, 0], ['compass-s', 0, 15], ['compass-w', -15, 0]] // id, centre of the letter on the card
 const seaState = (storm) => (storm < 0.2 ? ['Calm', 'good'] : storm < 0.5 ? ['Choppy', 'warn'] : storm < 0.8 ? ['Rough', 'bad'] : ['Stormy', 'bad'])
 
 export function createHud() {
@@ -95,7 +96,11 @@ export function createHud() {
       change('time', s.time, (v) => ($('dial-time').textContent = v))
       change('day', s.day, (v) => ($('dial-day').textContent = v))
       change('ring', Math.round(s.timeOfDay * 720), (v) => phases.setAttribute('transform', `rotate(${(180 - v / 2).toFixed(1)})`)) // "now" at the bottom
-      change('compass', Math.round(-s.heading), (v) => ($('compass-dial').style.transform = `rotate(${v}deg)`))
+      change('compass', Math.round(-s.heading), (v) => {
+        // The card turns under the fixed boat; the letters turn back so that they always read upright.
+        $('compass-card').setAttribute('transform', `rotate(${v})`)
+        for (const [id, x, y] of COMPASS_LETTERS) $(id).setAttribute('transform', `rotate(${-v} ${x} ${y})`)
+      })
 
       change('anchor', s.anchored, (v) => {
         $('dial-anchor').classList.toggle('down', v)

@@ -18,6 +18,7 @@ import { createWind } from './world/wind.js'
 import { QUALITY } from './quality.js'
 import { setupTouchMode, setupStick, isTouch } from './touch.js'
 import { setupTilt } from './tilt.js'
+import { screenSteer } from './camera/screenSteer.js'
 import { createDolphins } from './scene/dolphin.js'
 import { createLightning } from './world/lightning.js'
 import { createWake } from './world/wake.js'
@@ -183,6 +184,7 @@ async function main() {
     },
   })
   setupStick(interaction) // the touch joystick
+  interaction.screenRelative = (stick) => (rig.mode === 'planet' ? screenSteer(boatState, camera, stick, innerWidth / innerHeight) : null) // in planet view the stick points where the boat should go on the screen
   const tilt = setupTilt(interaction, { notify: (text) => hud.toast(text, 3.5) }) // steering by tilting the phone, an alternative to the stick's left / right
   const dev = createDevMode({ interaction, clock, spots, logbook, startFishing, getState: () => state }) // ?dev + code: weather, time and fishing tools
   const cursor = createCursorHider()

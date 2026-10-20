@@ -66,7 +66,7 @@ export function setupStick(interaction) {
     const rect = base.getBoundingClientRect()
     cx = rect.left + rect.width / 2 // the knob starts in the middle wherever the thumb lands
     cy = rect.top + rect.height / 2
-    reach = rect.width * 0.34
+    reach = interaction.tilt.active ? rect.height * 0.3 : rect.width * 0.34 // the lever is a slim track: its travel is along its height
     stick.active = true
     element.classList.add('active')
     move(event)
