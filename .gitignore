@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # separate React Native project (only its demo video is used on the site)
 TiltTekenen/
+
+# lives in its own repo (github.com/senne-debacker/wake); cloned in at deploy time
+wake/
