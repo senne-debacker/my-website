@@ -26,5 +26,8 @@ pnpm-debug.log*
 # separate React Native project (only its demo video is used on the site)
 TiltTekenen/
 
+# Blender project folder: only the compressed renders and videos in src/assets and public/videos are used on the site
+kraken/
+
 # lives in its own repo (github.com/senne-debacker/wake); cloned in at deploy time
 wake/

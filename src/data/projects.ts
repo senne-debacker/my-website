@@ -4,6 +4,9 @@ import lumen from "../assets/lumen-hero.png";
 import type01 from "../assets/type01-hero.png";
 import tiltionary from "../assets/tiltionary-hero.jpg";
 import wake from "../assets/wake-hero.jpg";
+import kraken from "../assets/kraken-hero.jpg";
+import krakenDesktop from "../assets/kraken-desktop.jpg";
+import krakenMobile from "../assets/kraken-mobile.jpg";
 
 export interface Project {
   /** Used in the URL: /work/{id} */
@@ -27,6 +30,8 @@ export interface Project {
   figma?: string;
   /** Demo video (a path in /public) for projects that cannot run in the browser. */
   video?: { src: string; caption: string };
+  /** More videos, each in its own section under the story (Tiltionary's `video` above is a square phone recording). */
+  clips?: { title: string; src: string; caption: string; ratio: string; poster?: ImageMetadata; maxWidth?: string }[];
   /** Source code, shown as a link next to the demo. */
   repo?: string;
   body: string[];
@@ -140,6 +145,47 @@ export const projects: Project[] = [
     body: [
       "Wake is a small game-like toy: a low-poly water planet with a fishing boat you steer yourself. The sea is drawn on the GPU with a Shadertoy noise shader ported to TSL, and the boat floats on exactly the same waves. It has a day and night cycle, storms with rain and lightning, a lighthouse, islands and a foam wake that follows your path.",
       "Best in a recent Chrome or Edge, since it needs WebGPU.",
+    ],
+  },
+  {
+    id: "kraken",
+    title: "Kraken",
+    tagline: "A tiny shipwreck in Blender, built around a bottle of rum.",
+    type: "3D scene & animation",
+    role: "3D design, lighting, animation",
+    context: "Expert Visual Design, Howest",
+    tags: ["Blender", "3D", "Animation"],
+    image: kraken,
+    accent: "#c8485a",
+    cardPosition: "50% 45%",
+    clips: [
+      {
+        title: "Animation",
+        src: "/videos/kraken-animation.mp4",
+        caption: "The scene as a ten second animation, with sound.",
+        ratio: "16 / 9",
+        poster: kraken,
+      },
+      {
+        title: "On a landing page, desktop",
+        src: "/videos/kraken-desktop.mp4",
+        caption: "The scene as the hero of a landing page: \u201cRelease the Kraken\u201d.",
+        ratio: "1440 / 900",
+        poster: krakenDesktop,
+      },
+      {
+        title: "On a landing page, mobile",
+        src: "/videos/kraken-mobile.mp4",
+        caption: "The same page on a phone.",
+        ratio: "600 / 1072",
+        poster: krakenMobile,
+        maxWidth: "22rem",
+      },
+    ],
+    body: [
+      "Kraken is a 3D scene I made in Blender for Expert Visual Design: a bottle of The Kraken rum held by a giant tentacle, in a miniature shipwreck. Around it are a ship's wheel, a treasure chest, a lantern, a diving helmet and a barrel, all standing on a wooden floor with a patch of sand.",
+      "The whole scene is left in the dark on purpose. A few cold shafts of light fall from above and the lantern is the only warm spot, so the bottle and the tentacle are what you look at first.",
+      "I rendered a still and a ten second animation with sound. To see how the scene works outside Blender, I also used it as the hero of a landing page, \u201cRelease the Kraken\u201d, in a desktop and a mobile mockup.",
     ],
   },
 ];

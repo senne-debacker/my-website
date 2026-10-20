@@ -124,6 +124,27 @@ const videoSrc = p.video ? `${baseUrl}${p.video.src}` : undefined;
       )
     }
 
+    {
+      p.clips?.map((clip) => (
+        <section class="proto wrap" aria-label={clip.title}>
+          <div class="proto-head rule">
+            <h2 class="label">{clip.title}</h2>
+          </div>
+
+          <video
+            class="clip"
+            src={`${baseUrl}${clip.src}`}
+            poster={clip.poster?.src}
+            controls
+            playsinline
+            preload="metadata"
+            style={`aspect-ratio:${clip.ratio};${clip.maxWidth ? `max-width:${clip.maxWidth}` : ""}`}
+          />
+          <p class="label muted caption">{clip.caption}</p>
+        </section>
+      ))
+    }
+
     <a href={projectHref(next, baseUrl)} class="next wrap" data-cursor="Next" style={`--n-accent:${next.accent}`}>
       <span class="label muted">Next project</span>
       <span class="next-title">
@@ -356,6 +377,12 @@ const videoSrc = p.video ? `${baseUrl}${p.video.src}` : undefined;
     display: block;
     width: min(100%, 44rem);
     aspect-ratio: 1 / 1;
+    background: var(--surface);
+  }
+
+.clip {
+    display: block;
+    width: 100%;
     background: var(--surface);
   }
 
