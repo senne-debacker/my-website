@@ -29,5 +29,8 @@ TiltTekenen/
 # Blender project folder: only the compressed renders and videos in src/assets and public/videos are used on the site
 kraken/
 
+# a second clone of the Wake repo (the hand-in folder): not part of the website
+3DEV_DeBackerSenne_WebGPU-ThreeJS/
+
 # lives in its own repo (github.com/senne-debacker/wake); cloned in at deploy time
 wake/
